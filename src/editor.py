@@ -12,11 +12,12 @@ from PyQt5.QtWidgets import (
     QLabel,
     QFileDialog,
     QWidget,
+    QStatusBar,
 )
 from PyQt5.QtCore import Qt, QDir, QSize, QModelIndex
 from PyQt5.QtGui import QFont, QPixmap, QColor
 
-from PyQt5.Qsci import QsciScintilla
+from PyQt5.Qsci import QsciScintilla, QsciScintillaBase
 
 
 class Editor(QsciScintilla):
