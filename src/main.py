@@ -21,6 +21,8 @@ import sys
 import os
 from pathlib import Path
 
+from editor import Editor
+
 
 class MainWindow(QMainWindow):
     def __init__(self):  # Constructor
@@ -42,34 +44,7 @@ class MainWindow(QMainWindow):
         self.show()
 
     def get_editor(self) -> QsciScintilla:
-        # instance
-        editor = QsciScintilla()
-
-        # Encoding
-        editor.setUtf8(True)
-
-        # Set the font of the editor
-        editor.setFont(self.window_font)
-
-        # Brace matching
-        editor.setBraceMatching(QsciScintilla.SloppyBraceMatch)
-
-        # identation
-        editor.setIndentationGuides(True)
-        editor.setTabWidth(4)
-        editor.setIndentationsUseTabs(False)
-        editor.setAutoIndent(True)
-
-        # caret
-        editor.setCaretForegroundColor(QColor("#dedcdc"))
-        editor.setCaretLineVisible(True)
-        editor.setCaretWidth(2)
-        editor.setCallTipsBackgroundColor(QColor("#2c313c"))
-
-        # EOL
-        editor.setEolMode(QsciScintilla.EolUnix)
-        editor.setEolVisibility(False)
-
+        editor = Editor()
         return editor
 
     def is_binary(
