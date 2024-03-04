@@ -1,10 +1,22 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QApplication,
+    QFrame,
+    QHBoxLayout,
+    QSizePolicy,
+    QSplitter,
+    QFileSystemModel,
+    QTreeView,
+    QMenu,
+    QVBoxLayout,
+)
+from PyQt5.QtCore import Qt, QDir
+from PyQt5.QtGui import QFont
 
-from PyQt5.Qsci import *
+from PyQt5.Qsci import QsciScintilla
 
 import sys
+import os
 from pathlib import Path
 
 
@@ -19,6 +31,9 @@ class MainWindow(QMainWindow):
 
         self.setStyleSheet(self.read_styles())
 
+        self.window_font = QFont("Droid Sans Mono", 12)  # Set the font of the window
+        self.setFont(self.window_font)  # Set the font of the window
+
         self.set_up_menu()
         self.set_up_body()
 
@@ -29,6 +44,9 @@ class MainWindow(QMainWindow):
             return file.read()
 
     def get_editor(self) -> QsciScintilla:
+        pass
+
+    def set_up_menu(self):
         menu_bar = self.menuBar()  # Get the menu bar of the window
 
         # File Menu
@@ -66,9 +84,6 @@ class MainWindow(QMainWindow):
         pass
 
     def copy(self):
-        pass
-
-    def set_up_menu(self):
         pass
 
     def set_up_body(self):
@@ -134,18 +149,20 @@ class MainWindow(QMainWindow):
         # Create file system model to show in tree view
         self.model = QFileSystemModel()
         self.model.setRootPath(os.getcwd())
+
         # File system filters
-        self.model.setFilter(Qdir.NoDotAndDotDot | QDir.AllDirs | QDir.Files)
+        self.model.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs | QDir.Files)
 
         # Tree View
         self.tree_view = QTreeView()
-        self.tree_view.setFont(QFont("Arial", 10))
+        self.tree_view.setFont(self.window_font)
         self.tree_view.setModel(self.model)
         self.tree_view.setRootIndex(self.model.index(os.getcwd()))
         self.tree_view.setSelectionMode(QTreeView.SingleSelection)
         self.tree_view.setSelectionBehavior(QTreeView.SelectRows)
         self.tree_view.setEditTriggers(QTreeView.NoEditTriggers)
 
+        # Context menu
         self.tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree_view.customContextMenuRequested.connect(self.tree_view_context_menu)
 
@@ -154,14 +171,30 @@ class MainWindow(QMainWindow):
         self.tree_view.setIndentation(10)
         self.tree_view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        def tree_view_context_menu(self, position):
-            menu = QMenu()
-            open_action = menu.addAction("Open")
-            open_action.triggered.connect(self.open_file)
-            menu.exec_(self.tree_view.viewport().mapToGlobal(position))
+        # Hide header and hide other columns except for name
+        self.tree_view.setHeaderHidden(True)
+        self.tree_view.setColumnHidden(1, True)
+        self.tree_view.setColumnHidden(2, True)
+        self.tree_view.setColumnHidden(3, True)
+
+        # setup layout
+        tree_frame_layout.addWidget(self.tree_view)
+        self.tree_frame.setLayout(tree_frame_layout)
+
+        # Add tree view to split view
+        self.hsplit.addWidget(self.tree_frame)
+
+        body.addWidget(self.hsplit)
+        body_frame.setLayout(body)
+
+        self.setCentralWidget(body_frame)
+
+    def tree_view_context_menu(self, position): ...
+
+    def tree_view_clicked(self): ...
 
 
 if __name__ == "__main__":
     app = QApplication([])
     window = MainWindow()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
