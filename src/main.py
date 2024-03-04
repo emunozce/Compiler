@@ -7,14 +7,13 @@ from PyQt5.QtWidgets import (
     QSplitter,
     QFileSystemModel,
     QTreeView,
-    QMenu,
     QVBoxLayout,
     QTabWidget,
     QLabel,
     QFileDialog,
 )
 from PyQt5.QtCore import Qt, QDir, QSize, QModelIndex
-from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtGui import QFont, QPixmap, QColor
 
 from PyQt5.Qsci import QsciScintilla
 
@@ -66,6 +65,12 @@ class MainWindow(QMainWindow):
         editor.setTabWidth(4)
         editor.setIndentationsUseTabs(False)
         editor.setAutoIndent(True)
+
+        # caret
+        editor.setCaretForegroundColor(QColor("#dedcdc"))
+        editor.setCaretLineVisible(True)
+        editor.setCaretWidth(2)
+        editor.setCallTipsBackgroundColor(QColor("#2c313c"))
 
         # EOL
         editor.setEolMode(QsciScintilla.EolUnix)
@@ -195,7 +200,7 @@ class MainWindow(QMainWindow):
         ops = QFileDialog.Options()  # Create a file dialog
         ops |= QFileDialog.DontUseNativeDialog
 
-        new_folder, _ = QFileDialog.getExistingDirectory(
+        new_folder = QFileDialog.getExistingDirectory(
             self, "Pick a folder", "", options=ops
         )
         if new_folder:
