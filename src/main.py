@@ -33,8 +33,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("IDE")  # Set the title of the window
         self.resize(900, 700)  # Set the size of the window
 
-        self.setStyleSheet(self.read_styles())
-
         self.window_font = QFont("Droid Sans Mono", 12)  # Set the font of the window
         self.setFont(self.window_font)  # Set the font of the window
 
@@ -42,10 +40,6 @@ class MainWindow(QMainWindow):
         self.set_up_body()
 
         self.show()
-
-    def read_styles(self):
-        with open("src/styles/style.css", "r", encoding="utf-8") as file:
-            return file.read()
 
     def get_editor(self) -> QsciScintilla:
         # instance
