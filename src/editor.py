@@ -44,10 +44,8 @@ class Editor(QsciScintilla):
         self.setAutoIndent(True)
 
         # caret
-        self.setCaretForegroundColor(QColor("#dedcdc"))
         self.setCaretLineVisible(True)
         self.setCaretWidth(2)
-        self.setCallTipsBackgroundColor(QColor("#2c313c"))
 
         # EOL
         self.setEolMode(QsciScintilla.EolUnix)
