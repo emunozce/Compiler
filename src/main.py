@@ -106,7 +106,8 @@ class MainWindow(QMainWindow):
 
     def set_up_menu(self):
         menu_bar = self.menuBar()  # Get the menu bar of the window
-        menu_bar.setStyleSheet(open(".\src\css\style.css").read())
+        menu_bar.setStyleSheet(open(r".\src\css\style.css").read())
+
 
         # File Menu
         file_menu = menu_bar.addMenu("File")
