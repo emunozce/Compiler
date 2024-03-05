@@ -32,8 +32,20 @@ class MainWindow(QMainWindow):
         self.init_ui()  # Call the method to initialize the UI
 
         self.current_file = None
+        self.editor = self.get_editor()
+        self.editor.cursorPositionChangedSignal.connect(self.actualiza_info_cursor)
+
 
         self.create_dock_panels()
+        # Crear un QLabel para mostrar la posición del cursor
+        self.cursor_info_label = QLabel("Line: 1, Column: 1")
+        self.statusBar().addPermanentWidget(self.cursor_info_label)
+
+    
+    def actualiza_info_cursor(self, line, index):
+        self.cursor_info_label.setText(f"Line: {1+line}, Column: {1+index}")
+
+
 
     def init_ui(self):  # Method to initialize the UI
         self.setWindowTitle("IDE")  # Set the title of the window
@@ -49,6 +61,7 @@ class MainWindow(QMainWindow):
 
     def get_editor(self) -> QsciScintilla:
         editor = Editor()
+        editor.cursorPositionChanged.connect(self.actualiza_info_cursor)  # Connect here
         return editor
 
     def is_binary(
@@ -93,7 +106,7 @@ class MainWindow(QMainWindow):
 
     def set_up_menu(self):
         menu_bar = self.menuBar()  # Get the menu bar of the window
-        menu_bar.setStyleSheet(open("./src/css/style.css").read())
+        menu_bar.setStyleSheet(open("Compiler\src\css\style.css").read())
 
         # File Menu
         file_menu = menu_bar.addMenu("File")

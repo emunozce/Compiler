@@ -14,15 +14,21 @@ from PyQt5.QtWidgets import (
     QWidget,
     QStatusBar,
 )
-from PyQt5.QtCore import Qt, QDir, QSize, QModelIndex
+from PyQt5.QtCore import Qt, QDir, QSize, QModelIndex,pyqtSignal
 from PyQt5.QtGui import QFont, QPixmap, QColor
+
 
 from PyQt5.Qsci import QsciScintilla, QsciScintillaBase
 
 
 class Editor(QsciScintilla):
-    def __init__(self, parent=None):
-        super(Editor, self).__init__(parent)
+    cursorPositionChangedSignal = pyqtSignal(int, int)
+
+    def __init__(self):
+        super(Editor, self).__init__()
+
+        self.cursorPositionChanged.connect(self.handleCursorPositionChanged)
+        
 
         # Encoding
         self.setUtf8(True)
@@ -57,3 +63,9 @@ class Editor(QsciScintilla):
         self.setMarginsForegroundColor(QColor("#ff888888"))
         self.setMarginsBackgroundColor(QColor("#282c34"))
         self.setMarginsFont(self.window_font)
+
+    def handleCursorPositionChanged(self, line, index):
+        # Emitir la señal personalizada con la información de la posición del cursor
+        self.cursorPositionChangedSignal.emit(line, index)
+
+    
