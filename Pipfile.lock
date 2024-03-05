@@ -1,7 +1,11 @@
 {
     "_meta": {
         "hash": {
+<<<<<<< HEAD
             "sha256": "7b95b6b82df1c444685d59962c3b5786d114763eeaa66e7181108d6b457372a8"
+=======
+            "sha256": "ae9beaed10bbfb68a1bf76f55205effd7593e94011ce2997c1378fcf5e9433f6"
+>>>>>>> ad9484563984959cd8963b7fe805e4689a618a6a
         },
         "pipfile-spec": 6,
         "requires": {
@@ -64,6 +68,7 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==12.13.0"
+<<<<<<< HEAD
         },
         "qscintilla": {
             "hashes": [
@@ -77,6 +82,8 @@
             "index": "pypi",
             "markers": "python_version >= '3.7'",
             "version": "==2.14.1"
+=======
+>>>>>>> ad9484563984959cd8963b7fe805e4689a618a6a
         }
     },
     "develop": {}

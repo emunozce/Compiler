@@ -5,7 +5,10 @@ name = "pypi"
 
 [packages]
 pyqt5 = "*"
+<<<<<<< HEAD
 qscintilla = "*"
+=======
+>>>>>>> ad9484563984959cd8963b7fe805e4689a618a6a
 
 [dev-packages]
 
