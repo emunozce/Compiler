@@ -16,6 +16,10 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QDir, QSize, QModelIndex
 from PyQt5.QtGui import QFont, QPixmap, QColor
+from PyQt5.QtGui import QCloseEvent
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QAction, QToolBar, QFileDialog
+from PyQt5.QtGui import QIcon
 
 from PyQt5.Qsci import QsciScintilla
 
@@ -74,7 +78,7 @@ class MainWindow(QMainWindow):
         editor = self.get_editor()
 
         if is_new_file:
-            self.tab_view.addTab(editor, "Untitled")
+            self.tab_view.addTab(editor, "Untitled*")
             self.setWindowTitle("Untitled")
             self.statusBar().showMessage("New file created", 2000)
             self.tab_view.setCurrentIndex(self.tab_view.count() - 1)
@@ -87,18 +91,26 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage("Cannot open binary files", 2000)
             return
 
-        # Check if the file is already open
+    # Check if the file is already open
         for i in range(self.tab_view.count()):
             if self.tab_view.tabText(i) == path.name:
                 self.tab_view.setCurrentIndex(i)
                 self.current_file = path
                 return
 
-        # Create new tab
+    # Create new tab
         self.tab_view.addTab(editor, path.name)
         if not is_new_file:
             with open(path, "r", encoding="utf-8") as file:
                 editor.setText(file.read())
+
+    # Verificar el estado de modificación y establecer o quitar el asterisco
+        editor.modified = False
+        if editor.text():
+            self.tab_view.setTabText(self.tab_view.currentIndex(), f"{path.name}*")
+        else:
+            self.tab_view.setTabText(self.tab_view.currentIndex(), path.name)
+
         self.setWindowTitle(path.name)
         self.current_file = path
         self.tab_view.setCurrentIndex(self.tab_view.count() - 1)
@@ -106,26 +118,42 @@ class MainWindow(QMainWindow):
 
     def set_up_menu(self):
         menu_bar = self.menuBar()  # Get the menu bar of the window
-        menu_bar.setStyleSheet(open(r".\src\css\style.css").read())
+        menu_bar.setStyleSheet(open("Compiler/src/css/style.css").read())
+
 
 
         # File Menu
         file_menu = menu_bar.addMenu("File")
 
+        toolbar = QToolBar("Toolbar")
+        self.addToolBar(toolbar)
+        toolbar.setStyleSheet("QToolBar { background-color: #fffff; }")
+
         # New File
-        new_file = file_menu.addAction("New File")
+        new_file = QAction(QIcon('Compiler/src/icons/add-document.png'), "Open File", self)
+        file_menu.addAction("New File")
         new_file.setShortcut("Ctrl+N")
         new_file.triggered.connect(self.new_file)
+        toolbar.addAction(new_file)
 
         # Open File
-        open_file = file_menu.addAction("Open File")
+        open_file = QAction(QIcon('Compiler/src/icons/document.png'), "Open File", self)
         open_file.setShortcut("Ctrl+O")
         open_file.triggered.connect(self.open_file)
+        file_menu.addAction(open_file)
+        toolbar.addAction(open_file)
 
         # Save File
-        save_file = file_menu.addAction("Save")
+        save_file = QAction(QIcon('Compiler/src/icons/disk.png'), "Save", self)
         save_file.setShortcut("Ctrl+S")
         save_file.triggered.connect(self.save_file)
+
+        # Añadir la acción al menú File
+        file_menu.addAction(save_file)
+
+        # Añadir la acción al toolbar
+        toolbar.addAction(save_file)
+
 
         # Save As
         save_as = file_menu.addAction("Save As")
@@ -133,9 +161,11 @@ class MainWindow(QMainWindow):
         save_as.triggered.connect(self.save_as)
 
         # Open Folder
-        open_folder = file_menu.addAction("Open Folder")
+        open_folder = QAction(QIcon('Compiler/src/icons/folder-open.png'), "Open Folder", self)
         open_folder.setShortcut("Ctrl+K")
         open_folder.triggered.connect(self.open_folder)
+        file_menu.addAction(open_folder)
+        toolbar.addAction(open_folder)
 
         # Edit Menu
         edit_menu = menu_bar.addMenu("Edit")
@@ -167,23 +197,40 @@ class MainWindow(QMainWindow):
         self.set_new_tab(f)
 
     def save_file(self):
-        if self.current_file is None and self.tab_view.count() > 0:
-            self.save_as()
+        if self.current_file is None:
+            self.save_as()  # Si no hay archivo actual, llamar a save_as
+        return
 
         editor = self.tab_view.currentWidget()
-        self.current_file.write_text(editor.text())
+        if editor is None:
+            return
+
+        text_to_save = editor.text()
+        if not text_to_save:  # Si el texto está vacío, mostrar un mensaje y no guardar
+            self.statusBar().showMessage("Cannot save an empty file", 2000)
+        return
+
+        self.current_file.write_text(text_to_save)
         self.statusBar().showMessage(f"Saved {self.current_file}", 2000)
+
+
+
 
     def save_as(self):
         editor = self.tab_view.currentWidget()
         if editor is None:
             return
 
-        file_path = QFileDialog.getSaveFileName(self, "Save as", os.getcwd())[0]
-        if file_path == "":
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save as", os.getcwd())
+        if not file_path:  # Si el usuario cancela, file_path será una cadena vacía
             self.statusBar().showMessage("Cancelled", 2000)
-            return
+        return
+
         path = Path(file_path)
+        if not path.name:  # Si no se proporciona un nombre de archivo, cancelar
+            self.statusBar().showMessage("Cancelled: Please provide a file name", 2000)
+            return
+
         path.write_text(editor.text())
         self.tab_view.setTabText(self.tab_view.currentIndex(), path.name)
         self.statusBar().showMessage(f"Saved {path}", 2000)
@@ -332,6 +379,27 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(body_frame)
 
     def close_tab(self, index):
+        editor = self.tab_view.widget(index)
+
+        reply = None  # Definir reply fuera del bloque if
+
+        if editor is not None:
+            if editor.isModified():
+                reply = QMessageBox.question(
+                self,
+                'Unsaved Changes',
+                'Do you want to save your changes?',
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
+
+            if reply == QMessageBox.Yes:
+                if self.current_file:
+                    self.save_file()
+                else:
+                    self.save_as()
+            elif reply == QMessageBox.Cancel:
+                return  # Do not close the tab
+
         self.tab_view.removeTab(index)
 
     def show_hide_tab(self, event): ...
@@ -341,6 +409,33 @@ class MainWindow(QMainWindow):
     def tree_view_clicked(self, index: QModelIndex):
         path = self.model.filePath(index)
         self.set_new_tab(Path(path))
+
+    def closeEvent(self, event: QCloseEvent):
+        if self.current_file is not None:
+            editor = self.tab_view.currentWidget()
+            if editor is not None and editor.isModified():
+                reply = QMessageBox.question(
+                    self,
+                    'Unsaved Changes',
+                    'Do you want to save your changes?',
+                    QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+                )
+
+                if reply == QMessageBox.Yes:
+                    self.save_file()
+                elif reply == QMessageBox.Cancel:
+                    event.ignore()  # Cancel the close event
+                    return
+
+        super(MainWindow, self).closeEvent(event)
+
+    def has_unsaved_changes(self):
+        # Check if there are unsaved changes in any tab
+        for i in range(self.tab_view.count()):
+            tab_text = self.tab_view.tabText(i)
+            if tab_text.endswith('*'):
+                return True
+        return False
 
     def create_dock_panels(self):
         # Lexico Panel

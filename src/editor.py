@@ -28,6 +28,11 @@ class Editor(QsciScintilla):
         super(Editor, self).__init__()
 
         self.cursorPositionChanged.connect(self.handleCursorPositionChanged)
+
+        self.modified = False
+
+        # Conectar el evento de modificación del documento
+        self.textChanged.connect(self.handle_text_changed)
         
 
         # Encoding
@@ -66,6 +71,12 @@ class Editor(QsciScintilla):
 
     def handleCursorPositionChanged(self, line, index):
         # Emitir la señal personalizada con la información de la posición del cursor
+        self.cursorPositionChangedSignal.emit(line, index)
+
+    def handle_text_changed(self):
+        # Este método se llama cada vez que el contenido del editor cambia
+        self.modified = True
+        line, index = self.getCursorPosition()
         self.cursorPositionChangedSignal.emit(line, index)
 
     
