@@ -118,7 +118,7 @@ class MainWindow(QMainWindow):
 
     def set_up_menu(self):
         menu_bar = self.menuBar()  # Get the menu bar of the window
-        menu_bar.setStyleSheet(open("Compiler/src/css/style.css").read())
+        menu_bar.setStyleSheet(open("src/css/style.css").read())
 
 
 
@@ -127,24 +127,24 @@ class MainWindow(QMainWindow):
 
         toolbar = QToolBar("Toolbar")
         self.addToolBar(toolbar)
-        toolbar.setStyleSheet("QToolBar { background-color: #fffff; }")
+        toolbar.setStyleSheet("QToolBar { background-color: #FFFFFF; }")
 
         # New File
-        new_file = QAction(QIcon('Compiler/src/icons/add-document.png'), "Open File", self)
+        new_file = QAction(QIcon('src/icons/add-document.png'), "Open File", self)
         file_menu.addAction("New File")
         new_file.setShortcut("Ctrl+N")
         new_file.triggered.connect(self.new_file)
         toolbar.addAction(new_file)
 
         # Open File
-        open_file = QAction(QIcon('Compiler/src/icons/document.png'), "Open File", self)
+        open_file = QAction(QIcon('src/icons/document.png'), "Open File", self)
         open_file.setShortcut("Ctrl+O")
         open_file.triggered.connect(self.open_file)
         file_menu.addAction(open_file)
         toolbar.addAction(open_file)
 
         # Save File
-        save_file = QAction(QIcon('Compiler/src/icons/disk.png'), "Save", self)
+        save_file = QAction(QIcon('src/icons/disk.png'), "Save", self)
         save_file.setShortcut("Ctrl+S")
         save_file.triggered.connect(self.save_file)
 
@@ -161,7 +161,7 @@ class MainWindow(QMainWindow):
         save_as.triggered.connect(self.save_as)
 
         # Open Folder
-        open_folder = QAction(QIcon('Compiler/src/icons/folder-open.png'), "Open Folder", self)
+        open_folder = QAction(QIcon('src/icons/folder-open.png'), "Open Folder", self)
         open_folder.setShortcut("Ctrl+K")
         open_folder.triggered.connect(self.open_folder)
         file_menu.addAction(open_folder)
