@@ -78,7 +78,7 @@ class MainWindow(QMainWindow):
         editor = self.get_editor()
 
         if is_new_file:
-            self.tab_view.addTab(editor, "Untitled*")
+            self.tab_view.addTab(editor, "Untitled")
             self.setWindowTitle("Untitled")
             self.statusBar().showMessage("New file created", 2000)
             self.tab_view.setCurrentIndex(self.tab_view.count() - 1)
