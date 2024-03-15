@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
 
 
         self.create_dock_panels()
-        # Crear un QLabel para mostrar la posición del cursor
+        # Crear un QLabel para mostrar la posici�n del cursor
         self.cursor_info_label = QLabel("Line: 1, Column: 1")
         self.statusBar().addPermanentWidget(self.cursor_info_label)
 
@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
         # Create new tab
         self.tab_view.addTab(editor, path.name)
         if not is_new_file:
-            with open(path, "r", encoding="utf-8") as file:
+            with open(path, "r") as file:
                 editor.setText(file.read())
         self.setWindowTitle(path.name)
         self.current_file = path
@@ -114,7 +114,7 @@ class MainWindow(QMainWindow):
 
     def set_up_menu(self):
         menu_bar = self.menuBar()  
-        menu_bar.setStyleSheet(open("Compiler\src\css\style.css").read())
+        menu_bar.setStyleSheet(open("Compiler\\src\\css\\style.css").read())
         toolbar = self.addToolBar("Toolbar")
         toolbar.setStyleSheet("QToolBar { background-color: #FFFFFF; }")
 
@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
         save_file_action.setShortcut("Ctrl+S")
         save_file_action.triggered.connect(self.save_file)
 
-        # Usa solo esta línea para agregar la acción al menú
+        # Usa solo esta l�nea para agregar la acci�n al men�
         file_menu.addAction(save_file_action)
 
         
@@ -261,7 +261,7 @@ class MainWindow(QMainWindow):
         save_icon_action.setShortcut("Ctrl+S")
         save_icon_action.triggered.connect(self.save_file)
 
-        # Agregar la acción del icono a la barra de herramientas
+        # Agregar la acci�n del icono a la barra de herramientas
         toolbar.addAction(save_icon_action)
 
         new_file_icon_action = QAction(QIcon('Compiler/src/icons/add-document.png'), "New File", self)
