@@ -7,3 +7,14 @@ QMenuBar * {
     background-color: #21252b;
     color: #D3D3D3;
 }
+
+QFrame {
+    background-color: #21252b;
+    border: none;
+    padding: 5px;
+    color: #D3D3D3;
+}
+
+QFrame:hover {
+    color: white;
+}
