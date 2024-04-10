@@ -1,3 +1,7 @@
+import sys
+import os
+from pathlib import Path
+
 from PyQt5.QtWidgets import (
     QMainWindow,
     QApplication,
@@ -19,9 +23,6 @@ from PyQt5.QtGui import QFont, QPixmap, QColor
 
 from PyQt5.Qsci import QsciScintilla
 
-import sys
-import os
-from pathlib import Path
 
 from editor import Editor
 
@@ -93,7 +94,7 @@ class MainWindow(QMainWindow):
 
     def set_up_menu(self):
         menu_bar = self.menuBar()  # Get the menu bar of the window
-        menu_bar.setStyleSheet(open("./src/css/style.css").read())
+        menu_bar.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
 
         # File Menu
         file_menu = menu_bar.addMenu("File")
@@ -157,7 +158,7 @@ class MainWindow(QMainWindow):
             self.save_as()
 
         editor = self.tab_view.currentWidget()
-        self.current_file.write_text(editor.text())
+        self.current_file.write_text(editor.text(), encoding="utf-8")
         self.statusBar().showMessage(f"Saved {self.current_file}", 2000)
 
     def save_as(self):
@@ -170,7 +171,7 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage("Cancelled", 2000)
             return
         path = Path(file_path)
-        path.write_text(editor.text())
+        path.write_text(editor.text(), encoding="utf-8")
         self.tab_view.setTabText(self.tab_view.currentIndex(), path.name)
         self.statusBar().showMessage(f"Saved {path}", 2000)
         self.current_file = path
@@ -254,7 +255,6 @@ class MainWindow(QMainWindow):
             """
             QFrame {
             background-color: #21252b;
-            border-radius: 5px;
             border: none;
             padding: 5px;
             color: #D3D3D3;
