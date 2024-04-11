@@ -2,10 +2,26 @@ import sys
 from pathlib import Path
 
 
-def get_tokens(file):
+def get_tokens(file: Path):
+    tokens = []
+    lin = 1
+    column = 1
+
     with open(file, "r", encoding="utf-8") as f:
         for line in f:
-            print(line)
+            lin = 1
+            for char in line:
+                if char == " ":
+                    lin += 1
+                    continue
+                elif char == "\t":
+                    lin += 4
+                    continue
+                elif char == "\n":
+                    column += 1
+                    continue
+                print(f"{char} line: {lin} column: {column}")
+                lin += 1
 
 
 if __name__ == "__main__":
