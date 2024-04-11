@@ -1,11 +1,19 @@
 import sys
 from pathlib import Path
+import re
 
 
 def get_tokens(file: Path):
-    tokens = []
 
     with open(file, "r", encoding="utf-8") as f:
+        tokens = []  # Store the token
+        position = []  # Store the position of the token in the file
+
+        identifier_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+        number_pattern = re.compile(r"^\d+(\.\d+)?$")
+        symbol_pattern = re.compile(r"\(|\)|,|{|}|;")
+        assignment_pattern = re.compile(r"=")
+
         col = 1
         ln = 1
 
@@ -21,8 +29,20 @@ def get_tokens(file: Path):
                 if char == "\n":
                     ln += 1
                     continue
-                print(f"{char} Ln: {ln}, Col: {col}")
+                if re.match(symbol_pattern, char):
+                    tokens.append({"Symbol": char})
+                    position.append({"Line": ln, "Column": col})
+                    col += 1
+                    continue
+                if re.match(assignment_pattern, char):
+                    tokens.append({"Assignment": char})
+                    position.append({"Line": ln, "Column": col})
+                    col += 1
+                    continue
                 col += 1
+
+        for i, token in enumerate(tokens):
+            print(f"{token} {position[i]}\n")
 
 
 if __name__ == "__main__":
