@@ -4,24 +4,25 @@ from pathlib import Path
 
 def get_tokens(file: Path):
     tokens = []
-    lin = 1
-    column = 1
 
     with open(file, "r", encoding="utf-8") as f:
+        col = 1
+        ln = 1
+
         for line in f:
-            lin = 1
+            col = 1
             for char in line:
                 if char == " ":
-                    lin += 1
+                    col += 1
                     continue
-                elif char == "\t":
-                    lin += 4
+                if char == "\t":
+                    col += 4
                     continue
-                elif char == "\n":
-                    column += 1
+                if char == "\n":
+                    ln += 1
                     continue
-                print(f"{char} line: {lin} column: {column}")
-                lin += 1
+                print(f"{char} Ln: {ln}, Col: {col}")
+                col += 1
 
 
 if __name__ == "__main__":
