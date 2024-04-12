@@ -1,13 +1,13 @@
 import sys
 from pathlib import Path
 import re
-from unittest import skip
 
 
 def get_tokens(file: Path):
 
     with open(file, "r", encoding="utf-8") as f:
         tokens = []  # Store the token
+        errors = []  # Store the error
         position = []  # Store the position of the token in the file
 
         identifier_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
@@ -20,13 +20,13 @@ def get_tokens(file: Path):
 
         lines = f.readlines()
 
-        for index, line in enumerate(lines):  # Enumerate lines starting from 1
+        for index, string in enumerate(lines):  # Enumerate lines starting from 1
             col = 1  # Column number always reset to 1 at the beginning of a line
             skip_col = 0
             ln = index + 1
 
             # Iterate over characters in the line
-            for char in line:
+            for char in string:
                 if skip_col == 0:
                     if char == " ":
                         col += 1
@@ -44,40 +44,44 @@ def get_tokens(file: Path):
                         continue
 
                     if re.match(identifier_pattern, char):
-                        identifier = char
-                        for char in line[col:]:
-                            if re.match(identifier_pattern, char):
-                                identifier += char
-                                col += 1
-                                skip_col += 1
-                            else:
-                                col += 1
-                                break
+                        identifier = ""
+                        identifier += char  # Add the first character to the identifier
+                        new_string = string[col:]  # Get the rest of the string
+
+                        i = 0
+                        while i < len(new_string) and re.match(
+                            identifier_pattern, new_string[i]
+                        ):
+                            identifier += new_string[i]
+                            col += 1
+                            skip_col += 1
+                            i += 1
+
                         if re.match(reserved_words_pattern, identifier):
                             tokens.append({"Reserved Word": identifier})
-                            position.append({"Line": ln, "Column": col})
-                        else:
-                            tokens.append({"Identifier": identifier})
-                            position.append({"Line": ln, "Column": col})
+                            position.append(
+                                {"Line": ln, "Column": col - len(identifier) + 1}
+                            )
+                            col += 1
+                            continue
 
+                        tokens.append({"Identifier": identifier})
+                        position.append(
+                            {"Line": ln, "Column": col - len(identifier) + 1}
+                        )
+                        col += 1
                         continue
 
-                    if re.match(assignment_pattern, char):
-                        if line[col] == "=":
-                            tokens.append({"Relational Operator": "=="})
-                            position.append({"Line": ln, "Column": col})
-                            col += 1
-                            skip_col += 1  # Skip the next character
-                        else:
-                            tokens.append({"Assignment Operator": "="})
-                            position.append({"Line": ln, "Column": col})
-                            col += 1
-                else:
+                    errors.append({"Error": char, "Line": ln, "Column": col})
                     col += 1
+                else:
                     skip_col -= 1
 
         for i, token in enumerate(tokens):
             print(f"{token} {position[i]}\n")
+
+        # for i, error in enumerate(errors):
+        #     print(f"{error}\n")
 
 
 if __name__ == "__main__":
