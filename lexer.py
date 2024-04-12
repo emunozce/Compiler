@@ -12,7 +12,7 @@ def get_tokens(file: Path):
 
         identifier_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
         reserved_words_pattern = re.compile(
-            r"\b(if|else|do|while|switch|case|integer|double|main|cin|cout)\b"
+            r"\b(if|else|do|while|switch|case|double|main|cin|cout|int|real|then|end|until)\b"
         )
         number_pattern = re.compile(r"^\d+(\.\d+)?$")
         symbol_pattern = re.compile(r"\(|\)|,|{|}|;")
