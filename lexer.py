@@ -1,3 +1,9 @@
+"""
+    Python file that contains the function get_tokens(file: Path)
+    that extracts tokens from a file and returns a list of tokens along
+    with their errors and it's positions.
+"""
+
 import sys
 from pathlib import Path
 import re
@@ -24,6 +30,7 @@ def get_tokens(file: Path):
         errors = []  # Store the errors
         position = []  # Store the position of the token in the file
 
+        ############################## Patterns ##############################
         identifier_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
         reserved_words_pattern = re.compile(
             r"\b(if|else|do|while|switch|case|double|main|cin|cout|int|real|then|end|until)\b"
@@ -32,26 +39,29 @@ def get_tokens(file: Path):
         symbol_pattern = re.compile(r"\(|\)|,|{|}|;")
         assignment_pattern = re.compile(r"=")
         logical_op_pattern = re.compile(r"\b(?:and|or)\b")
+        ######################################################################
 
-        lines = f.readlines()
+        for index, line in enumerate(f.readlines()):
 
-        for index, string in enumerate(lines):  # Enumerate lines starting from 1
             col = 1  # Column number always reset to 1 at the beginning of a line
-            skip_col = 0
-            ln = index + 1
+            ln = index + 1  # Line number in the file
+
+            skip_col = 0  # Columns to skip for multiple character tokens
 
             # Iterate over characters in the line
-            for index_string, char in enumerate(string):
+            for index_string, char in enumerate(line):
                 if skip_col == 0:
                     if char == " ":
                         col += 1
                         continue
+
                     if char == "\t":
                         col += 4
                         continue
+
                     if char == "\n":
-                        col = 1
                         continue
+
                     if re.match(symbol_pattern, char):
                         tokens.append({"Symbol": char})
                         position.append({"Line": ln, "Column": col})
@@ -59,55 +69,15 @@ def get_tokens(file: Path):
                         continue
 
                     if re.match(assignment_pattern, char):
-                        if string[index_string + 1] == "=":
+                        if line[index_string + 1] == "=":
                             tokens.append({"Logical Operator": "=="})
                             position.append({"Line": ln, "Column": col})
-                            col += 2
                             skip_col += 1
+                            col += skip_col + 1
                             continue
 
                         tokens.append({"Assignment": char})
                         position.append({"Line": ln, "Column": col})
-                        col += 1
-                        continue
-
-                    if re.match(number_pattern, char):
-                        number = ""
-                        number += char  # Add the first character to the number
-                        new_string = string[col:]  # Get the rest of the string
-
-                        i = 0
-                        while i < len(new_string) and re.match(
-                            number_pattern, new_string[i]
-                        ):
-                            number += new_string[i]
-                            col += 1
-                            skip_col += 1
-                            i += 1
-
-                        if (
-                            i < len(new_string)
-                            and new_string[i] == "."
-                            and re.match(number_pattern, new_string[i + 1])
-                        ):
-                            number += new_string[i]
-                            col += 2
-                            skip_col += 1
-                            i += 1
-                            while i < len(new_string) and re.match(
-                                number_pattern, new_string[i]
-                            ):
-                                number += new_string[i]
-                                col += 1
-                                skip_col += 1
-                                i += 1
-                            tokens.append({"Float Number": number})
-                            continue
-                        elif i < len(new_string) and new_string[i] != ".":
-                            tokens.append({"Integer Number": number})
-                            col += 1
-                            continue
-                        errors.append({"Error": char, "Line": ln, "Column": col})
                         col += 1
                         continue
 
@@ -116,38 +86,70 @@ def get_tokens(file: Path):
                     ):  # Check if it is an identifier, a reserved word or a logical operator
                         identifier = ""
                         identifier += char  # Add the first character to the identifier
-                        new_string = string[col:]  # Get the rest of the string
+                        rest_of_string = line[
+                            index_string + 1 :
+                        ]  # Get the rest of the string
 
-                        i = 0
-                        while i < len(new_string) and re.match(
-                            identifier_pattern, new_string[i]
-                        ):
-                            identifier += new_string[i]
-                            col += 1
-                            skip_col += 1
-                            i += 1
+                        while True:
+                            for c in rest_of_string:
+                                if re.match(identifier_pattern, c):
+                                    identifier += c
+                                    skip_col += 1
+                                else:
+                                    break
+                            break
 
                         if re.match(logical_op_pattern, identifier):
                             tokens.append({"Logical Operator": identifier})
-                            position.append(
-                                {"Line": ln, "Column": col - len(identifier) + 1}
-                            )
-                            col += 1
+                            position.append({"Line": ln, "Column": col})
+                            col += skip_col + 1
                             continue
 
                         if re.match(reserved_words_pattern, identifier):
                             tokens.append({"Reserved Word": identifier})
-                            position.append(
-                                {"Line": ln, "Column": col - len(identifier) + 1}
-                            )
-                            col += 1
+                            position.append({"Line": ln, "Column": col})
+                            col += skip_col + 1
                             continue
 
                         tokens.append({"Identifier": identifier})
-                        position.append(
-                            {"Line": ln, "Column": col - len(identifier) + 1}
-                        )
-                        col += 1
+                        position.append({"Line": ln, "Column": col})
+                        col += skip_col + 1
+                        continue
+
+                    if re.match(number_pattern, char):
+                        number = ""
+                        number += char
+                        rest_of_string = line[index_string + 1 :]
+                        is_float_recognized = False
+
+                        while True:
+                            for i_c, c in enumerate(rest_of_string):
+                                if re.match(number_pattern, c):
+                                    number += c
+                                    skip_col += 1
+                                elif (
+                                    c == "."
+                                    and re.match(
+                                        number_pattern, rest_of_string[i_c + 1]
+                                    )
+                                    and not is_float_recognized
+                                ):
+                                    is_float_recognized = True
+                                    number += c
+                                    skip_col += 1
+                                else:
+                                    break
+                            break
+
+                        if is_float_recognized:
+                            tokens.append({"Real Number": number})
+                            position.append({"Line": ln, "Column": col})
+                            col += skip_col + 1
+                            continue
+
+                        tokens.append({"Integer Number": number})
+                        position.append({"Line": ln, "Column": col})
+                        col += skip_col + 1
                         continue
 
                     errors.append({"Error": char, "Line": ln, "Column": col})
@@ -155,7 +157,7 @@ def get_tokens(file: Path):
                 else:
                     skip_col -= 1
 
-        return [tokens, errors]
+        return [errors, position]
 
 
 if __name__ == "__main__":
@@ -170,14 +172,6 @@ if __name__ == "__main__":
             print("File does not exist")
         else:
             results = get_tokens(file_path)
-            int_numbers = [num for num in results[0] if "Integer Number" in num]
-            float_numbers = [num for num in results[0] if "Float Number" in num]
 
-            # for token in numbers:
-            #     print(f"{token}")
-
-            for token in results[0]:
-                print(f"{token}")
-
-            for token in results[1]:
-                print(f"{token}")
+            for i, element in enumerate(results[0]):
+                print(f"{element} at {results[1][i]}")
