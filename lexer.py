@@ -39,6 +39,8 @@ def get_tokens(file: Path):
         symbol_pattern = re.compile(r"\(|\)|,|{|}|;")
         assignment_pattern = re.compile(r"=")
         logical_op_pattern = re.compile(r"\b(?:and|or)\b")
+        aritmethic_op_pattern = re.compile(r"\+|-|\*|/|%|'\^'")
+        relational_op_pattern = re.compile(r"<|>|!")
         ######################################################################
 
         for index, line in enumerate(f.readlines()):
@@ -77,6 +79,18 @@ def get_tokens(file: Path):
                             continue
 
                         tokens.append({"Assignment": char})
+                        position.append({"Line": ln, "Column": col})
+                        col += 1
+                        continue
+
+                    if re.match(aritmethic_op_pattern, char):
+                        tokens.append({"Arithmetic Operator": char})
+                        position.append({"Line": ln, "Column": col})
+                        col += 1
+                        continue
+
+                    if re.match(relational_op_pattern, char):
+                        tokens.append({"Relational Operator": char})
                         position.append({"Line": ln, "Column": col})
                         col += 1
                         continue
@@ -157,7 +171,7 @@ def get_tokens(file: Path):
                 else:
                     skip_col -= 1
 
-        return [errors, position]
+        return [tokens, position]
 
 
 if __name__ == "__main__":
@@ -174,4 +188,4 @@ if __name__ == "__main__":
             results = get_tokens(file_path)
 
             for i, element in enumerate(results[0]):
-                print(f"{element} at {results[1][i]}")
+                print(f"{element} {results[1][i]}")
