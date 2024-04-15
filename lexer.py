@@ -30,6 +30,10 @@ def get_tokens(file: Path):
         errors = []  # Store the errors
         position = []  # Store the position of the token in the file
 
+        is_block_comment = (
+            False  # Flag to check if the current character is inside a block comment
+        )
+
         ############################## Patterns ##############################
         identifier_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
         reserved_words_pattern = re.compile(
@@ -39,7 +43,7 @@ def get_tokens(file: Path):
         symbol_pattern = re.compile(r"\(|\)|,|{|}|;")
         assignment_pattern = re.compile(r"=")
         logical_op_pattern = re.compile(r"\b(?:and|or)\b")
-        aritmethic_op_pattern = re.compile(r"\+|-|\*|/|%|'\^'")
+        aritmethic_op_pattern = re.compile(r"\+|-|\*|/|%|\^")
         relational_op_pattern = re.compile(r"<|>|!")
         ######################################################################
 
@@ -64,14 +68,16 @@ def get_tokens(file: Path):
                     if char == "\n":
                         continue
 
-                    if re.match(symbol_pattern, char):
+                    if re.match(symbol_pattern, char) and (not is_block_comment):
                         tokens.append({"Symbol": char})
                         position.append({"Line": ln, "Column": col})
                         col += 1
                         continue
 
-                    if re.match(assignment_pattern, char):
-                        if line[index_string + 1] == "=":
+                    if re.match(assignment_pattern, char) and (not is_block_comment):
+                        if (index_string + 1 < len(line)) and line[
+                            index_string + 1
+                        ] == "=":
                             tokens.append({"Logical Operator": "=="})
                             position.append({"Line": ln, "Column": col})
                             skip_col += 1
@@ -83,20 +89,66 @@ def get_tokens(file: Path):
                         col += 1
                         continue
 
-                    if re.match(aritmethic_op_pattern, char):
+                    if re.match(aritmethic_op_pattern, char) and (not is_block_comment):
+                        if char == "+" and line[index_string + 1] == "+":
+                            tokens.append({"Increment Operator": "++"})
+                            position.append({"Line": ln, "Column": col})
+                            skip_col += 1
+                            col += skip_col + 1
+                            continue
+
+                        if char == "-" and line[index_string + 1] == "-":
+                            tokens.append({"Decrement Operator": "--"})
+                            position.append({"Line": ln, "Column": col})
+                            skip_col += 1
+                            col += skip_col + 1
+                            continue
+
+                        if (
+                            char == "/"
+                            and (index_string + 1 < len(line))
+                            and line[index_string + 1] == "*"
+                        ):
+                            is_block_comment = True
+                            break
+
+                        if (
+                            char == "/"
+                            and (index_string + 1 < len(line))
+                            and line[index_string + 1] == "/"
+                        ):
+                            break
+
+                        if (
+                            is_block_comment
+                            and char == "*"
+                            and (index_string + 1 < len(line))
+                            and line[index_string + 1] == "/"
+                        ):
+                            is_block_comment = False
+                            continue
+
                         tokens.append({"Arithmetic Operator": char})
                         position.append({"Line": ln, "Column": col})
                         col += 1
                         continue
 
-                    if re.match(relational_op_pattern, char):
+                    if re.match(relational_op_pattern, char) and (not is_block_comment):
+                        if (index_string + 1 < len(line)) and line[
+                            index_string + 1
+                        ] == "=":
+                            tokens.append({"Relational Operator": char + "="})
+                            position.append({"Line": ln, "Column": col})
+                            skip_col += 1
+                            col += skip_col + 1
+                            continue
                         tokens.append({"Relational Operator": char})
                         position.append({"Line": ln, "Column": col})
                         col += 1
                         continue
 
-                    if re.match(
-                        identifier_pattern, char
+                    if re.match(identifier_pattern, char) and (
+                        not is_block_comment
                     ):  # Check if it is an identifier, a reserved word or a logical operator
                         identifier = ""
                         identifier += char  # Add the first character to the identifier
@@ -130,7 +182,7 @@ def get_tokens(file: Path):
                         col += skip_col + 1
                         continue
 
-                    if re.match(number_pattern, char):
+                    if re.match(number_pattern, char) and (not is_block_comment):
                         number = ""
                         number += char
                         rest_of_string = line[index_string + 1 :]
@@ -166,12 +218,23 @@ def get_tokens(file: Path):
                         col += skip_col + 1
                         continue
 
-                    errors.append({"Error": char, "Line": ln, "Column": col})
-                    col += 1
+                    if not is_block_comment:
+                        errors.append({"Error": char, "Line": ln, "Column": col})
+                        col += 1
+
+                    if is_block_comment:
+                        if (
+                            char == "*"
+                            and (index_string + 1 < len(line))
+                            and line[index_string + 1] == "/"
+                        ):
+                            is_block_comment = False
+                            skip_col += 1
+                            col += skip_col + 1
                 else:
                     skip_col -= 1
 
-        return [tokens, position]
+        return [tokens, errors]
 
 
 if __name__ == "__main__":
@@ -187,5 +250,8 @@ if __name__ == "__main__":
         else:
             results = get_tokens(file_path)
 
-            for i, element in enumerate(results[0]):
-                print(f"{element} {results[1][i]}")
+            for element in results[0]:
+                print(f"{element}")
+
+            for element in results[1]:
+                print(f"{element}")
