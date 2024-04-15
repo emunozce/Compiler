@@ -34,6 +34,10 @@ def get_tokens(file: Path):
             False  # Flag to check if the current character is inside a block comment
         )
 
+        is_block_starting = (
+            []
+        )  # Store the position of the block comment starting Ln and Col
+
         ############################## Patterns ##############################
         identifier_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
         reserved_words_pattern = re.compile(
@@ -109,6 +113,7 @@ def get_tokens(file: Path):
                             and (index_string + 1 < len(line))
                             and line[index_string + 1] == "*"
                         ):
+                            is_block_starting = [ln, col]
                             is_block_comment = True
                             break
 
@@ -233,6 +238,13 @@ def get_tokens(file: Path):
                             col += skip_col + 1
                 else:
                     skip_col -= 1
+
+        if is_block_comment:
+            errors.append(
+                {
+                    "Error": f"Block comment not closed at Line: {is_block_starting[0]}, Column {is_block_starting[1]}"
+                }
+            )
 
         return [tokens, errors]
 
