@@ -96,13 +96,17 @@ def get_tokens(file: Path):
                         if (
                             char == "/"
                             and (index_string + 1 < len(line))
-                            and (
-                                line[index_string + 1] == "*"
-                                or (line[index_string + 1] == "/")
-                            )
+                            and (line[index_string + 1] == "*")
                         ):
                             is_block_starting = [index + 1, index_string + 1]
                             is_block_comment = True
+                            break
+
+                        if (
+                            char == "/"
+                            and (index_string + 1 < len(line))
+                            and line[index_string + 1] == "/"
+                        ):
                             break
 
                         tokens.append({"Arithmetic Operator": char})
