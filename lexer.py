@@ -32,8 +32,8 @@ def get_tokens(file: Path):
         # Flag to check if the current character is inside a block comment
         is_block_comment = False
 
-        # Flag to check if the current token is multi character
-        is_multi_char_token = False
+        possible_multiline_token = False
+        multiline_token = ""
 
         # Store the position of the block comment starting Ln and Col
         is_block_starting = []
@@ -58,6 +58,60 @@ def get_tokens(file: Path):
             # Iterate over characters in the line
             for index_string, char in enumerate(line):
                 if skip_col == 0:
+                    if possible_multiline_token:
+                        if char == " ":
+                            continue
+
+                        if char == "\t":
+                            continue
+
+                        if char == "\n":
+                            continue
+
+                        if re.match(aritmethic_op_pattern, multiline_token):
+                            if char == "+" and multiline_token == "+":
+                                multiline_token += char
+                                tokens.append({"Increment Operator": multiline_token})
+                                possible_multiline_token = False
+                                multiline_token = ""
+                                continue
+
+                            if char == "-" and multiline_token == "-":
+                                multiline_token += char
+                                tokens.append({"Decrement Operator": multiline_token})
+                                possible_multiline_token = False
+                                multiline_token = ""
+                                continue
+
+                        if re.match(relational_op_pattern, multiline_token):
+                            if char == "=":
+                                multiline_token += char
+                                tokens.append({"Relational Operator": multiline_token})
+                                possible_multiline_token = False
+                                multiline_token = ""
+                                continue
+
+                        if re.match(assignment_pattern, multiline_token):
+                            if char == "=":
+                                multiline_token += char
+                                tokens.append({"Relational Operator": multiline_token})
+                                possible_multiline_token = False
+                                multiline_token = ""
+                                continue
+
+                        if re.match(aritmethic_op_pattern, multiline_token):
+                            tokens.append({"Arithmetic Operator": multiline_token})
+                            possible_multiline_token = False
+                            multiline_token = ""
+                        elif re.match(relational_op_pattern, multiline_token):
+                            tokens.append({"Relational Operator": multiline_token})
+                            possible_multiline_token = False
+                            multiline_token = ""
+                        elif re.match(assignment_pattern, multiline_token):
+                            tokens.append({"Assignment": multiline_token})
+                            possible_multiline_token = False
+                            multiline_token = ""
+
                     if char == " ":
                         continue
 
@@ -74,8 +128,15 @@ def get_tokens(file: Path):
                     if re.match(assignment_pattern, char) and (not is_block_comment):
                         if (index_string + 1 < len(line)) and line[
                             index_string + 1
+                        ] == "\n":
+                            possible_multiline_token = True
+                            multiline_token = char
+                            continue
+
+                        if (index_string + 1 < len(line)) and line[
+                            index_string + 1
                         ] == "=":
-                            tokens.append({"Logical Operator": "=="})
+                            tokens.append({"Relational Operator": "=="})
                             skip_col += 1
                             continue
 
@@ -83,6 +144,15 @@ def get_tokens(file: Path):
                         continue
 
                     if re.match(aritmethic_op_pattern, char) and (not is_block_comment):
+                        if (
+                            char in ["+", "-"]
+                            and (index_string + 1 < len(line))
+                            and line[index_string + 1] == "\n"
+                        ):
+                            possible_multiline_token = True
+                            multiline_token = char
+                            continue
+
                         if char == "+" and line[index_string + 1] == "+":
                             tokens.append({"Increment Operator": "++"})
                             skip_col += 1
@@ -113,6 +183,13 @@ def get_tokens(file: Path):
                         continue
 
                     if re.match(relational_op_pattern, char) and (not is_block_comment):
+                        if (index_string + 1 < len(line)) and line[
+                            index_string + 1
+                        ] == "\n":
+                            possible_multiline_token = True
+                            multiline_token = char
+                            continue
+
                         if (index_string + 1 < len(line)) and line[
                             index_string + 1
                         ] == "=":
@@ -177,7 +254,31 @@ def get_tokens(file: Path):
                             break
 
                         if is_float_recognized:
+                            if tokens[-1] == {"Arithmetic Operator": "-"}:
+                                tokens.pop()
+                                number = "-" + number
+                                tokens.append({"Real Number": number})
+                                continue
+
+                            if tokens[-1] == {"Arithmetic Operator": "+"}:
+                                tokens.pop()
+                                number = "+" + number
+                                tokens.append({"Real Number": number})
+                                continue
+
                             tokens.append({"Real Number": number})
+                            continue
+
+                        if tokens[-1] == {"Arithmetic Operator": "-"}:
+                            tokens.pop()
+                            number = "-" + number
+                            tokens.append({"Integer Number": number})
+                            continue
+
+                        if tokens[-1] == {"Arithmetic Operator": "+"}:  # Ignore the +
+                            tokens.pop()
+                            number = "+" + number
+                            tokens.append({"Integer Number": number})
                             continue
 
                         tokens.append({"Integer Number": number})
@@ -224,6 +325,8 @@ if __name__ == "__main__":
         if not file_path.exists():
             print("File does not exist")
         else:
+            # bytes = file_path.read_bytes()
+            # print(bytes)
             results = get_tokens(file_path)
 
             for element in results[0]:
