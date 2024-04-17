@@ -32,7 +32,9 @@ def get_tokens(file: Path):
         # Flag to check if the current character is inside a block comment
         is_block_comment = False
 
+        # Flag to check if the current token is multiline
         possible_multiline_token = False
+        # Store the current multiline token
         multiline_token = ""
 
         # Store the position of the block comment starting Ln and Col
