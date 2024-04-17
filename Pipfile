@@ -4,8 +4,8 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyqt5 = "*"
-qscintilla = "*"
+pyqt5 = "==5.15.7"
+qscintilla = "==2.13.3"
 
 [dev-packages]
 
