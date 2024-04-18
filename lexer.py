@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 
 
-def get_tokens(file: Path):
+def get_lexycal_analysis(file: Path):
     """
     Extracts tokens from a file and returns a list of tokens along with their positions.
 
@@ -329,7 +329,7 @@ if __name__ == "__main__":
         else:
             # bytes = file_path.read_bytes()
             # print(bytes)
-            results = get_tokens(file_path)
+            results = get_lexycal_analysis(file_path)
 
             for element in results[0]:
                 print(f"{element}")
