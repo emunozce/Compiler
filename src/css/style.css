@@ -8,13 +8,16 @@ QMenuBar * {
     color: #D3D3D3;
 }
 
-QFrame {
-    background-color: #21252b;
-    border: none;
-    padding: 5px;
+QDockWidget {
     color: #D3D3D3;
+    margin: 0;
 }
 
-QFrame:hover {
-    color: white;
+QDockWidget::title {
+    background-color: #282c34;
+}
+
+QTextBrowser {
+    background-color: #000000;
+    color: #D3D3D3;
 }
