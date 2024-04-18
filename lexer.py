@@ -18,13 +18,13 @@ def get_tokens(file: Path):
 
     Returns:
         list: A list containing in [0] a list of dictionaries representing tokens
-        containing the token type and in [1] a list of dictionaries
+        containing the token type and it's value, [1] contains list of dictionaries
         representing errors and its position in the file.
 
     Raises:
         None
-
     """
+
     with open(file, "r", encoding="utf-8") as f:
         tokens = []  # Store the tokens found
         errors = []  # Store the errors
