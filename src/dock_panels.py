@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QTextBrowser, QDockWidget
 
 
-lexer = []
+lexer = []  # List to store the widgets of the lexer dock panel
 
 
 def set_up_dock_panels(window: QMainWindow):
