@@ -19,12 +19,14 @@ from PyQt5.QtWidgets import (
     QTextBrowser,
 )
 from PyQt5.QtCore import Qt, QDir, QSize, QModelIndex
-from PyQt5.QtGui import QFont, QPixmap, QColor
+from PyQt5.QtGui import QFont, QPixmap
 
 from PyQt5.Qsci import QsciScintilla
 
 
 from editor import Editor
+from menu import set_up_menu
+from dock_panels import set_up_dock_panels
 
 
 class MainWindow(QMainWindow):
@@ -34,8 +36,6 @@ class MainWindow(QMainWindow):
 
         self.current_file = None
 
-        self.create_dock_panels()
-
     def init_ui(self):  # Method to initialize the UI
         self.setWindowTitle("IDE")  # Set the title of the window
         self.resize(1100, 900)  # Set the size of the window
@@ -43,8 +43,11 @@ class MainWindow(QMainWindow):
         self.window_font = QFont("Droid Sans Mono", 12)  # Set the font of the window
         self.setFont(self.window_font)  # Set the font of the window
 
-        self.set_up_menu()
+        set_up_menu(self)
+
         self.set_up_body()
+
+        set_up_dock_panels(self)
 
         self.show()
 
@@ -91,51 +94,6 @@ class MainWindow(QMainWindow):
         self.current_file = path
         self.tab_view.setCurrentIndex(self.tab_view.count() - 1)
         self.statusBar().showMessage(f"Opened {path}", 2000)
-
-    def set_up_menu(self):
-        menu_bar = self.menuBar()  # Get the menu bar of the window
-        menu_bar.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
-
-        # File Menu
-        file_menu = menu_bar.addMenu("File")
-
-        # New File
-        new_file = file_menu.addAction("New File")
-        new_file.setShortcut("Ctrl+N")
-        new_file.triggered.connect(self.new_file)
-
-        # Open File
-        open_file = file_menu.addAction("Open File")
-        open_file.setShortcut("Ctrl+O")
-        open_file.triggered.connect(self.open_file)
-
-        # Save File
-        save_file = file_menu.addAction("Save")
-        save_file.setShortcut("Ctrl+S")
-        save_file.triggered.connect(self.save_file)
-
-        # Save As
-        save_as = file_menu.addAction("Save As")
-        save_as.setShortcut("Ctrl+Shift+S")
-        save_as.triggered.connect(self.save_as)
-
-        # Open Folder
-        open_folder = file_menu.addAction("Open Folder")
-        open_folder.setShortcut("Ctrl+K")
-        open_folder.triggered.connect(self.open_folder)
-
-        # Edit Menu
-        edit_menu = menu_bar.addMenu("Edit")
-
-        copy_action = edit_menu.addAction("Copy")
-        copy_action.setShortcut("Ctrl+C")
-        copy_action.triggered.connect(self.copy)
-
-        # Compile Menu
-        compilar_menu = menu_bar.addMenu("Run")
-        compilar_action = compilar_menu.addAction("Start")
-        compilar_action.setShortcut("Ctrl+R")
-        compilar_action.triggered.connect(self.compilar)
 
     def new_file(self):
         self.set_new_tab(None, is_new_file=True)
@@ -327,73 +285,6 @@ class MainWindow(QMainWindow):
     def tree_view_clicked(self, index: QModelIndex):
         path = self.model.filePath(index)
         self.set_new_tab(Path(path))
-
-    def create_dock_panels(self):
-        # Lexico Panel
-        lexico_panel = QDockWidget("Lexico", self)
-        lexico_widget = QTextBrowser()
-        lexico_panel.setWidget(lexico_widget)
-        self.addDockWidget(Qt.BottomDockWidgetArea, lexico_panel)
-
-        # Sintactico Panel
-        sintactico_panel = QDockWidget("Sintactico", self)
-        sintactico_widget = QTextBrowser()
-        sintactico_panel.setWidget(sintactico_widget)
-        self.addDockWidget(Qt.BottomDockWidgetArea, sintactico_panel)
-
-        # Semantico Panel
-        semantico_panel = QDockWidget("Semantico", self)
-        semantico_widget = QTextBrowser()
-        semantico_panel.setWidget(semantico_widget)
-        self.addDockWidget(Qt.BottomDockWidgetArea, semantico_panel)
-
-        # Hash Table Panel
-        hash_table_panel = QDockWidget("Hash Table", self)
-        hash_table_widget = QTextBrowser()
-        hash_table_panel.setWidget(hash_table_widget)
-        self.addDockWidget(Qt.BottomDockWidgetArea, hash_table_panel)
-
-        # Codigo Intermedio Panel
-        codigo_intermedio_panel = QDockWidget("Codigo Intermedio", self)
-        codigo_intermedio_widget = QTextBrowser()
-        codigo_intermedio_panel.setWidget(codigo_intermedio_widget)
-        self.addDockWidget(Qt.BottomDockWidgetArea, codigo_intermedio_panel)
-
-        # Results Panel
-        results_panel = QDockWidget("Resultados", self)
-        results_widget = QTextBrowser()
-        results_panel.setWidget(results_widget)
-        self.addDockWidget(Qt.BottomDockWidgetArea, results_panel)
-
-        # Lexic Errors Panel
-        errores_lexic_panel = QDockWidget("Err. Lexicos", self)
-        errores_lexic_widget = QTextBrowser()
-        errores_lexic_panel.setWidget(errores_lexic_widget)
-        self.addDockWidget(Qt.BottomDockWidgetArea, errores_lexic_panel)
-
-        # Sintactic Errors Panel
-        errores_sintactic_panel = QDockWidget("Err. Sintacticos", self)
-        errores_sintactic_widget = QTextBrowser()
-        errores_sintactic_panel.setWidget(errores_sintactic_widget)
-        self.addDockWidget(Qt.BottomDockWidgetArea, errores_sintactic_panel)
-
-        # Semantic Errors Panel
-        errores_semantic_panel = QDockWidget("Err. Semanticos", self)
-        errores_semantic_widget = QTextBrowser()
-        errores_semantic_panel.setWidget(errores_semantic_widget)
-        self.addDockWidget(Qt.BottomDockWidgetArea, errores_semantic_panel)
-
-        self.tabifyDockWidget(lexico_panel, sintactico_panel)
-        self.tabifyDockWidget(sintactico_panel, semantico_panel)
-        self.tabifyDockWidget(semantico_panel, hash_table_panel)
-        self.tabifyDockWidget(hash_table_panel, codigo_intermedio_panel)
-        self.tabifyDockWidget(codigo_intermedio_panel, results_panel)
-        self.tabifyDockWidget(results_panel, errores_lexic_panel)
-        self.tabifyDockWidget(errores_lexic_panel, errores_sintactic_panel)
-        self.tabifyDockWidget(errores_sintactic_panel, errores_semantic_panel)
-
-        # Allow the user to drag out the dock widgets
-        self.setDockOptions(QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks)
 
 
 if __name__ == "__main__":
