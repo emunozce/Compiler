@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QFont, QColor
 
-from PyQt5.Qsci import QsciScintilla
+from PyQt5.Qsci import QsciScintilla, QsciLexerCustom
 
 
 class Editor(QsciScintilla):
@@ -11,7 +11,7 @@ class Editor(QsciScintilla):
         self.setUtf8(True)
 
         # Set the font
-        self.window_font = QFont("Droid Sans Mono", 12)  # Set the font of the window
+        self.window_font = QFont("Monospace", 12)  # Set the font of the window
         self.setFont(self.window_font)  # Set the font of the window
 
         # Set the font of the self
@@ -29,10 +29,15 @@ class Editor(QsciScintilla):
         # caret
         self.setCaretLineVisible(True)
         self.setCaretWidth(2)
+        self.setCaretLineBackgroundColor(QColor("#2c313c"))
 
         # EOL
         self.setEolMode(QsciScintilla.EolUnix)
         self.setEolVisibility(False)
+
+        # Lexer
+
+        self.setLexer()
 
         # Line Numbers
         self.setMarginType(0, QsciScintilla.NumberMargin)

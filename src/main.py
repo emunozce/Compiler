@@ -13,18 +13,17 @@ from PyQt5.QtWidgets import (
     QTreeView,
     QVBoxLayout,
     QTabWidget,
-    QLabel,
     QFileDialog,
 )
-from PyQt5.QtCore import Qt, QDir, QSize, QModelIndex
-from PyQt5.QtGui import QFont, QPixmap
-
+from PyQt5.QtCore import Qt, QDir, QModelIndex
+from PyQt5.QtGui import QFont
 from PyQt5.Qsci import QsciScintilla
 
+from components.editor import Editor
+from components.menu import set_up_menu
+from components.dock_panels import set_up_dock_panels, set_lexical_analysis_result
+from components.side_bar import set_up_sidebar
 
-from editor import Editor
-from menu import set_up_menu
-from dock_panels import set_up_dock_panels, set_lexical_analysis_result
 from lexer import get_lexycal_analysis
 
 
@@ -42,8 +41,10 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("IDE")  # Set the title of the window
         self.resize(1100, 900)  # Set the size of the window
 
-        self.window_font = QFont("Droid Sans Mono", 12)  # Set the font of the window
+        self.window_font = QFont("Monospace", 12)  # Set the font of the window
         self.setFont(self.window_font)  # Set the font of the window
+
+        self.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
 
         set_up_menu(self)
 
@@ -63,7 +64,7 @@ class MainWindow(QMainWindow):
         editor = self.get_editor()
 
         if is_new_file:
-            self.tab_view.addTab(editor, "Untitled")
+            self.tab_view.addTab(editor, f"Untitled-{self.tab_view.count() + 1}")
             self.setWindowTitle("Untitled")
             self.statusBar().showMessage("New file created", 2000)
             self.tab_view.setCurrentIndex(self.tab_view.count() - 1)
@@ -183,30 +184,7 @@ class MainWindow(QMainWindow):
         body.setSpacing(0)
         body_frame.setLayout(body)
 
-        # Side_bar
-        self.side_bar = QFrame()
-        self.side_bar.setFrameShape(QFrame.StyledPanel)
-        self.side_bar.setFrameShadow(QFrame.Plain)
-        self.side_bar.setStyleSheet(
-            """
-            background-color: #2b2b2b;
-            """
-        )
-        side_bar_layout = QHBoxLayout()
-        side_bar_layout.setContentsMargins(5, 10, 5, 0)
-        side_bar_layout.setSpacing(0)
-        side_bar_layout.setAlignment(Qt.AlignTop | Qt.AlignCenter)
-
-        # setup labels
-        folder_label = QLabel()
-        folder_label.setPixmap(
-            QPixmap("./src/icons/folder-icon-blue.svg").scaled(QSize(25, 25))
-        )
-        folder_label.setAlignment(Qt.AlignmentFlag.AlignTop)
-        folder_label.setFont(self.window_font)
-        folder_label.mousePressEvent = self.show_hide_tab
-        side_bar_layout.addWidget(folder_label)
-        self.side_bar.setLayout(side_bar_layout)
+        set_up_sidebar(self, body)
 
         body.addWidget(self.side_bar)
 
@@ -291,8 +269,6 @@ class MainWindow(QMainWindow):
 
     def close_tab(self, index):
         self.tab_view.removeTab(index)
-
-    def show_hide_tab(self, event): ...
 
     def tree_view_context_menu(self, position): ...
 
