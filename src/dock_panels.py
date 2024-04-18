@@ -6,6 +6,9 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow, QTextBrowser, QDockWidget
 
 
+lexer = []
+
+
 def set_up_dock_panels(window: QMainWindow):
     """
     Sets up the dock panels of the window
@@ -21,6 +24,7 @@ def set_up_dock_panels(window: QMainWindow):
     lexer_panel = QDockWidget("Lexico", window)
     lexer_panel.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
     lexer_widget = QTextBrowser()
+    lexer.append(lexer_widget)
     lexer_widget.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
     lexer_panel.setWidget(lexer_widget)
     window.addDockWidget(Qt.BottomDockWidgetArea, lexer_panel)
@@ -44,7 +48,6 @@ def set_up_dock_panels(window: QMainWindow):
     # Panel for the Hash Table
     hash_table_panel = QDockWidget("Hash Table", window)
     hash_table_panel.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
-    hash
     hash_table_widget = QTextBrowser()
     hash_table_widget.setStyleSheet(
         open("./src/css/style.css", encoding="utf-8").read()
@@ -76,6 +79,7 @@ def set_up_dock_panels(window: QMainWindow):
     lexic_err_panel = QDockWidget("Err. Lexicos", window)
     lexic_err_panel.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
     lexic_err_widget = QTextBrowser()
+    lexer.append(lexic_err_widget)
     lexic_err_widget.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
     lexic_err_panel.setWidget(lexic_err_widget)
     window.addDockWidget(Qt.BottomDockWidgetArea, lexic_err_panel)
@@ -115,3 +119,8 @@ def set_up_dock_panels(window: QMainWindow):
 
     # Allow the user to drag out the dock widgets
     window.setDockOptions(QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks)
+
+
+def set_lexical_analysis_result():
+    lexer[0].setText("Lexical Analysis Result")
+    lexer[1].setText("Lexical Errors")

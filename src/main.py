@@ -15,8 +15,6 @@ from PyQt5.QtWidgets import (
     QTabWidget,
     QLabel,
     QFileDialog,
-    QDockWidget,
-    QTextBrowser,
 )
 from PyQt5.QtCore import Qt, QDir, QSize, QModelIndex
 from PyQt5.QtGui import QFont, QPixmap
@@ -26,7 +24,8 @@ from PyQt5.Qsci import QsciScintilla
 
 from editor import Editor
 from menu import set_up_menu
-from dock_panels import set_up_dock_panels
+from dock_panels import set_up_dock_panels, set_lexical_analysis_result
+from lexer import get_lexycal_analysis
 
 
 class MainWindow(QMainWindow):
