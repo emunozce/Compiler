@@ -29,13 +29,16 @@ from lexer import get_lexycal_analysis
 
 
 class MainWindow(QMainWindow):
+    """Main window of the application."""
+
     def __init__(self):  # Constructor
         super(QMainWindow, self).__init__()  # Call the constructor of the parent class
         self.init_ui()  # Call the method to initialize the UI
 
         self.current_file = None
 
-    def init_ui(self):  # Method to initialize the UI
+    def init_ui(self):
+        """Initialize the UI of the window."""
         self.setWindowTitle("IDE")  # Set the title of the window
         self.resize(1100, 900)  # Set the size of the window
 
@@ -51,16 +54,12 @@ class MainWindow(QMainWindow):
         self.show()
 
     def get_editor(self) -> QsciScintilla:
+        """Get the editor widget."""
         editor = Editor()
         return editor
 
-    def is_binary(
-        self, path: Path
-    ) -> bool:  # Check if a file is binary (e.g. image, video, etc.)
-        with open(path, "rb") as file:
-            return b"\0" in file.read(1024)  # Check for null bytes
-
     def set_new_tab(self, path: Path, is_new_file=False):
+        """Set a new tab with the editor."""
         editor = self.get_editor()
 
         if is_new_file:
@@ -95,9 +94,16 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(f"Opened {path}", 2000)
 
     def new_file(self):
+        """Create a new file."""
         self.set_new_tab(None, is_new_file=True)
 
+    def is_binary(self, path: Path) -> bool:
+        """Check if a file is binary (e.g. image, video, etc.)"""
+        with open(path, "rb") as file:
+            return b"\0" in file.read(1024)  # Check for null bytes
+
     def open_file(self):
+        """Open a file."""
         ops = QFileDialog.Options()  # Create a file dialog
         # ops |= QFileDialog.DontUseNativeDialog
         new_file, _ = QFileDialog.getOpenFileName(
@@ -111,6 +117,7 @@ class MainWindow(QMainWindow):
         self.set_new_tab(f)
 
     def save_file(self):
+        """Save the current file."""
         if self.current_file is None and self.tab_view.count() > 0:
             self.save_as()
 
@@ -119,6 +126,7 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(f"Saved {self.current_file}", 2000)
 
     def save_as(self):
+        """Save the current file as a new file."""
         editor = self.tab_view.currentWidget()
         if editor is None:
             return
@@ -134,6 +142,7 @@ class MainWindow(QMainWindow):
         self.current_file = path
 
     def open_folder(self):
+        """Open a folder in the file explorer."""
         ops = QFileDialog.Options()  # Create a file dialog
         ops |= QFileDialog.DontUseNativeDialog
 
@@ -146,16 +155,20 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage(f"Opened {new_folder}", 2000)
 
     def copy(self):
+        """Copy the selected text to the clipboard."""
         editor = self.tab_view.currentWidget()
         if editor is None:
             return
         editor.copy()
 
     def compile(self):
-        lexycal_results = get_lexycal_analysis(self.current_file)
-        set_lexical_analysis_result(lexycal_results)
+        """Compile the current file."""
+        if self.current_file is not None:
+            lexycal_results = get_lexycal_analysis(self.current_file)
+            set_lexical_analysis_result(lexycal_results)
 
     def set_up_body(self):
+        """Set up the body of the window."""
         # Body
 
         body_frame = QFrame()

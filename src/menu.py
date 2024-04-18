@@ -21,17 +21,10 @@ def set_up_menu(window: QMainWindow):
     set_up_file_menu_actions(window, menu_bar.addMenu("File"))
 
     # Edit Menu
-    edit_menu = menu_bar.addMenu("Edit")
-
-    copy_action = edit_menu.addAction("Copy")
-    copy_action.setShortcut("Ctrl+C")
-    copy_action.triggered.connect(window.copy)
+    set_up_edit_menu_actions(window, menu_bar.addMenu("Edit"))
 
     # Compile Menu
-    compilar_menu = menu_bar.addMenu("Run")
-    compilar_action = compilar_menu.addAction("Start")
-    compilar_action.setShortcut("Ctrl+R")
-    compilar_action.triggered.connect(window.compile)
+    set_up_run_menu_actions(window, menu_bar.addMenu("Run"))
 
 
 def set_up_file_menu_actions(window: QMainWindow, file_menu: QMenu):
@@ -70,3 +63,39 @@ def set_up_file_menu_actions(window: QMainWindow, file_menu: QMenu):
     open_folder = file_menu.addAction("Open Folder")
     open_folder.setShortcut("Ctrl+K")
     open_folder.triggered.connect(window.open_folder)
+
+
+def set_up_edit_menu_actions(window: QMainWindow, edit_menu: QMenu):
+    """
+    Sets up the actions of the edit menu
+
+    Args:
+        window (QMainWindow): The window where the file will be opened
+        edit_menu (QMenu): The menu where the actions will be added
+
+    Returns:
+        None
+    """
+
+    # Copy
+    copy = edit_menu.addAction("Copy")
+    copy.setShortcut("Ctrl+C")
+    copy.triggered.connect(window.copy)
+
+
+def set_up_run_menu_actions(window: QMainWindow, run_menu: QMenu):
+    """
+    Sets up the actions of the run menu
+
+    Args:
+        window (QMainWindow): The window where the file will be opened
+        run_menu (QMenu): The menu where the actions will be added
+
+    Returns:
+        None
+    """
+
+    # Compile
+    compile = run_menu.addAction("Compile")
+    compile.setShortcut("Ctrl+R")
+    compile.triggered.connect(window.compile)
