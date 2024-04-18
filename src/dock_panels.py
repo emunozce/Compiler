@@ -121,6 +121,12 @@ def set_up_dock_panels(window: QMainWindow):
     window.setDockOptions(QMainWindow.AllowTabbedDocks | QMainWindow.AllowNestedDocks)
 
 
-def set_lexical_analysis_result():
-    lexer[0].setText("Lexical Analysis Result")
-    lexer[1].setText("Lexical Errors")
+def set_lexical_analysis_result(results: list[str]):
+    tokens = ""
+    errors = ""
+    for element in results[0]:
+        tokens += f"{str(element)}\n"
+    for element in results[1]:
+        errors += f"{str(element)}\n"
+    lexer[0].setText(tokens)
+    lexer[1].setText(errors)
