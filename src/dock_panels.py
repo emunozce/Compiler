@@ -125,8 +125,8 @@ def set_lexical_analysis_result(results: list[str]):
     tokens = ""
     errors = ""
     for element in results[0]:
-        tokens += f"{str(element)}\n"
+        tokens += f"{element}\n"
     for element in results[1]:
-        errors += f"{str(element)}\n"
+        errors += f"{element}\n"
     lexer[0].setText(tokens)
     lexer[1].setText(errors)

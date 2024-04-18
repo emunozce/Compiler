@@ -329,10 +329,10 @@ if __name__ == "__main__":
         else:
             # bytes = file_path.read_bytes()
             # print(bytes)
-            results = get_lexycal_analysis(file_path)
+            tkns, errs = get_lexycal_analysis(file_path)
 
-            for element in results[0]:
-                print(f"{element}")
+            for token in tkns:
+                print(f"{token}")
 
-            for element in results[1]:
-                print(f"{element}")
+            for error in errs:
+                print(f"{error}")

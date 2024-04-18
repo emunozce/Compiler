@@ -151,8 +151,9 @@ class MainWindow(QMainWindow):
             return
         editor.copy()
 
-    def lexycal_analysis(self):
-        set_lexical_analysis_result(get_lexycal_analysis(self.current_file))
+    def compile(self):
+        lexycal_results = get_lexycal_analysis(self.current_file)
+        set_lexical_analysis_result(lexycal_results)
 
     def set_up_body(self):
         # Body

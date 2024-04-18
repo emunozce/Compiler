@@ -31,7 +31,7 @@ def set_up_menu(window: QMainWindow):
     compilar_menu = menu_bar.addMenu("Run")
     compilar_action = compilar_menu.addAction("Start")
     compilar_action.setShortcut("Ctrl+R")
-    compilar_action.triggered.connect(window.lexycal_analysis)
+    compilar_action.triggered.connect(window.compile)
 
 
 def set_up_file_menu_actions(window: QMainWindow, file_menu: QMenu):
