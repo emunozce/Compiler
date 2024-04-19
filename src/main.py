@@ -94,14 +94,14 @@ class MainWindow(QMainWindow):
         self.tab_view.setCurrentIndex(self.tab_view.count() - 1)
         self.statusBar().showMessage(f"Opened {path}", 2000)
 
-    def new_file(self):
-        """Create a new file."""
-        self.set_new_tab(None, is_new_file=True)
-
     def is_binary(self, path: Path) -> bool:
         """Check if a file is binary (e.g. image, video, etc.)"""
         with open(path, "rb") as file:
             return b"\0" in file.read(1024)  # Check for null bytes
+
+    def new_file(self):
+        """Create a new file."""
+        self.set_new_tab(None, is_new_file=True)
 
     def open_file(self):
         """Open a file."""
