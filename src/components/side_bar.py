@@ -4,7 +4,7 @@ This module contains the functions to set up the side bar of the main window.
 
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import QMainWindow, QFrame, QHBoxLayout, QLabel
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QMouseEvent
 
 
 def set_up_sidebar(window: QMainWindow, body: QFrame):
@@ -29,11 +29,16 @@ def set_up_sidebar(window: QMainWindow, body: QFrame):
     )
     folder_label.setAlignment(Qt.AlignmentFlag.AlignTop)
     folder_label.setFont(window.window_font)
-    folder_label.mousePressEvent = show_hide_tab
+    folder_label.mousePressEvent = lambda e: show_hide_tab(window, e)
     side_bar_layout.addWidget(folder_label)
     window.side_bar.setLayout(side_bar_layout)
 
     body.addWidget(window.side_bar)
 
 
-def show_hide_tab(event): ...
+def show_hide_tab(window: QMainWindow, e: QMouseEvent):
+    """Show or hide the file manager tab."""
+    if window.tree_frame.isHidden():
+        window.tree_frame.show()
+    else:
+        window.tree_frame.hide()
