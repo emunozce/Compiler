@@ -1,7 +1,7 @@
-/* QMainWindow {
+QMainWindow {
     background-color: #282c34;
     color: #D3D3D3
-} */
+}
 
 QMainWindow::statusBar {
     background-color: #D3D3D3;
@@ -153,6 +153,11 @@ QDockWidget::title {
 QTextBrowser {
     background-color: #000000;
     color: #D3D3D3;
+}
+
+QStatusBar {
+    background-color: #FFFFFF;
+    color: #000000;
 }
 
 QsciScintilla {
