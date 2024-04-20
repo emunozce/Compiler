@@ -137,4 +137,5 @@ def set_up_menu(window: QMainWindow):
     # Compile Menu
     set_up_run_menu_actions(window, menu_bar.addMenu("Run"))
 
+    # Icons
     set_up_icons_for_menu(window, menu_bar)
