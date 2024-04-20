@@ -1,3 +1,5 @@
+"""Main file of the application."""
+
 import sys
 import os
 from pathlib import Path
@@ -14,6 +16,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QTabWidget,
     QFileDialog,
+    QLabel,
 )
 from PyQt5.QtCore import Qt, QDir, QModelIndex
 from PyQt5.QtGui import QFont
@@ -31,10 +34,20 @@ class MainWindow(QMainWindow):
     """Main window of the application."""
 
     def __init__(self):  # Constructor
-        super(QMainWindow, self).__init__()  # Call the constructor of the parent class
-        self.init_ui()  # Call the method to initialize the UI
+        super().__init__()  # Call the constructor of the parent class
 
-        self.current_file = None
+        self.hsplit = QSplitter(Qt.Horizontal)  # Create a horizontal splitter
+        self.tree_frame = QFrame()  # Create a frame to hold the tree view
+        self.model = QFileSystemModel()  # Create a file system model
+        self.tree_view = QTreeView()  # Create a tree view
+        self.tab_view = QTabWidget()  # Create a tab view
+        self.cursor_info_label = QLabel(
+            "Line: 1, Column: 1"
+        )  # Create a label to show the cursor position
+
+        self.current_file = None  # Variable to store the current file
+
+        self.init_ui()  # Call the method to initialize the UI
 
     def init_ui(self):
         """Initialize the UI of the window."""
@@ -57,6 +70,7 @@ class MainWindow(QMainWindow):
     def get_editor(self) -> QsciScintilla:
         """Get the editor widget."""
         editor = Editor()
+        editor.cursorPositionChangedSignal.connect(self.get_current_line_column)
         return editor
 
     def set_new_tab(self, path: Path, is_new_file=False):
@@ -168,6 +182,19 @@ class MainWindow(QMainWindow):
             lexycal_results = get_lexycal_analysis(self.current_file)
             set_lexical_analysis_result(lexycal_results)
 
+    def close_tab(self, index):
+        """Close the tab at the given index."""
+        self.tab_view.removeTab(index)
+
+    def tree_view_clicked(self, index: QModelIndex):
+        """Handle the click event on the tree view."""
+        path = self.model.filePath(index)
+        self.set_new_tab(Path(path))
+
+    def get_current_line_column(self, line, index):
+        """Get the current line and column of the cursor."""
+        self.cursor_info_label.setText(f"Line: {1+line}, Column: {1+index}")
+
     def set_up_body(self):
         """Set up the body of the window."""
         # Body
@@ -189,10 +216,8 @@ class MainWindow(QMainWindow):
         body.addWidget(self.side_bar)
 
         # Split View
-        self.hsplit = QSplitter(Qt.Horizontal)
 
         # frame and layout to hold tree view (file explorer)
-        self.tree_frame = QFrame()
         self.tree_frame.setLineWidth(1)
         self.tree_frame.setMaximumWidth(400)
         self.tree_frame.setMinimumWidth(200)
@@ -216,14 +241,12 @@ class MainWindow(QMainWindow):
         )
 
         # Create file system model to show in tree view
-        self.model = QFileSystemModel()
         self.model.setRootPath(os.getcwd())
 
         # File system filters
         self.model.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs | QDir.Files)
 
         # Tree View
-        self.tree_view = QTreeView()
         self.tree_view.setFont(self.window_font)
         self.tree_view.setModel(self.model)
         self.tree_view.setRootIndex(self.model.index(os.getcwd()))
@@ -233,7 +256,6 @@ class MainWindow(QMainWindow):
 
         # Context menu
         self.tree_view.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tree_view.customContextMenuRequested.connect(self.tree_view_context_menu)
 
         # Handling click
         self.tree_view.clicked.connect(self.tree_view_clicked)
@@ -251,7 +273,6 @@ class MainWindow(QMainWindow):
         self.tree_frame.setLayout(tree_frame_layout)
 
         # Tab widget to add editor to
-        self.tab_view = QTabWidget()
         self.tab_view.setContentsMargins(0, 0, 0, 0)
         self.tab_view.setTabsClosable(True)
         self.tab_view.setMovable(True)
@@ -262,19 +283,13 @@ class MainWindow(QMainWindow):
         self.hsplit.addWidget(self.tree_frame)
         self.hsplit.addWidget(self.tab_view)
 
+        # Add cursor info label to status bar (permanent widget)
+        self.statusBar().addPermanentWidget(self.cursor_info_label)
+
         body.addWidget(self.hsplit)
         body_frame.setLayout(body)
 
         self.setCentralWidget(body_frame)
-
-    def close_tab(self, index):
-        self.tab_view.removeTab(index)
-
-    def tree_view_context_menu(self, position): ...
-
-    def tree_view_clicked(self, index: QModelIndex):
-        path = self.model.filePath(index)
-        self.set_new_tab(Path(path))
 
 
 if __name__ == "__main__":

@@ -122,6 +122,7 @@ def set_up_dock_panels(window: QMainWindow):
 
 
 def set_lexical_analysis_result(results: list[str]):
+    """Set the results of the lexical analysis in the dock panel"""
     tokens = ""
     errors = ""
     for element in results[0]:

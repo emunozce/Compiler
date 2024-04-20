@@ -75,9 +75,9 @@ def set_up_run_menu_actions(window: QMainWindow, run_menu: QMenu):
     """
 
     # Compile
-    compile = run_menu.addAction("Compile")
-    compile.setShortcut("Ctrl+R")
-    compile.triggered.connect(window.compile)
+    compile_start = run_menu.addAction("Compile")
+    compile_start.setShortcut("Ctrl+R")
+    compile_start.triggered.connect(window.compile)
 
 
 def set_up_icons_for_menu(window: QMainWindow, menu_bar):
