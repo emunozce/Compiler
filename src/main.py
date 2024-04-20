@@ -42,7 +42,7 @@ class MainWindow(QMainWindow):
         self.tree_view = QTreeView()  # Create a tree view
         self.tab_view = QTabWidget()  # Create a tab view
         self.cursor_info_label = QLabel(
-            "Line: 1, Column: 1"
+            "Line: , Column: "
         )  # Create a label to show the cursor position
 
         self.current_file = None  # Variable to store the current file
@@ -136,6 +136,7 @@ class MainWindow(QMainWindow):
         if self.current_file is None and self.tab_view.count() > 0:
             self.save_as()
 
+        if self.tab_view.count() > 0:
             editor = self.tab_view.currentWidget()
             self.current_file.write_text(editor.text(), encoding="utf-8")
             self.statusBar().showMessage(f"Saved {self.current_file}", 2000)
