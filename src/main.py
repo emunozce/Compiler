@@ -185,6 +185,9 @@ class MainWindow(QMainWindow):
     def close_tab(self, index):
         """Close the tab at the given index."""
         self.tab_view.removeTab(index)
+        if self.tab_view.count() == 0:
+            self.setWindowTitle("IDE")
+            self.current_file = None
 
     def tree_view_clicked(self, index: QModelIndex):
         """Handle the click event on the tree view."""
