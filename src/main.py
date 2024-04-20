@@ -136,9 +136,9 @@ class MainWindow(QMainWindow):
         if self.current_file is None and self.tab_view.count() > 0:
             self.save_as()
 
-        editor = self.tab_view.currentWidget()
-        self.current_file.write_text(editor.text(), encoding="utf-8")
-        self.statusBar().showMessage(f"Saved {self.current_file}", 2000)
+            editor = self.tab_view.currentWidget()
+            self.current_file.write_text(editor.text(), encoding="utf-8")
+            self.statusBar().showMessage(f"Saved {self.current_file}", 2000)
 
     def save_as(self):
         """Save the current file as a new file."""
