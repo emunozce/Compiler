@@ -26,7 +26,6 @@ from components.editor import Editor
 from components.menu import set_up_menu
 from components.dock_panels import set_up_dock_panels, set_lexical_analysis_result
 from components.side_bar import set_up_sidebar
-
 from lexer import get_lexycal_analysis
 
 
