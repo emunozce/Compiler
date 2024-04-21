@@ -3,10 +3,11 @@
 import builtins
 import keyword
 import pkgutil
+import re
 import types
 from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.Qsci import QsciScintilla, QsciLexerCustom, QsciAPIs
+from PyQt5.Qsci import QsciScintilla, QsciLexerCustom
 
 
 class Editor(QsciScintilla):
@@ -41,7 +42,7 @@ class Editor(QsciScintilla):
         # caret
         self.setCaretLineVisible(True)
         self.setCaretWidth(2)
-        self.setCaretLineBackgroundColor(QColor("#1A0089FF"))
+        self.setCaretLineBackgroundColor(QColor("#3A0089FF"))
 
         # EOL
         self.setEolMode(QsciScintilla.EolUnix)
@@ -85,9 +86,6 @@ class CustomLexer(QsciLexerCustom):
         self.setDefaultPaper(QColor(self.color2))
         self.setDefaultFont(QFont("Monospace", 12))
 
-        # Keywords
-        self.KEYWORD_LIST = keyword.kwlist
-
         self.builtin_functions_names = [
             name
             for name, obj in vars(builtins).items()
@@ -106,11 +104,11 @@ class CustomLexer(QsciLexerCustom):
         # Styles
         self.setColor(QColor(self.color1), self.DEFAULT)
         self.setColor(QColor("#d19a66"), self.NUMBER)
-        self.setColor(QColor("#61afef"), self.IDENTIFIER)
-        self.setColor(QColor("#e06c75"), self.KEYWORD)
-        self.setColor(QColor("#5c6370"), self.COMMENT)
-        self.setColor(QColor("#98c379"), self.ARITHMETIC_OPERATOR)
-        self.setColor(QColor("#61afef"), self.RELATIONAL_OPERATOR)
+        self.setColor(QColor("#09eded"), self.IDENTIFIER)
+        self.setColor(QColor("#fa37b9"), self.KEYWORD)
+        self.setColor(QColor("#6ff781"), self.COMMENT)
+        self.setColor(QColor("#de0000"), self.ARITHMETIC_OPERATOR)
+        self.setColor(QColor("#1685f5"), self.RELATIONAL_OPERATOR)
 
         # Paper Color
         self.setPaper(QColor(self.color2), self.DEFAULT)
@@ -152,8 +150,59 @@ class CustomLexer(QsciLexerCustom):
             return ""
 
     def styleText(self, start, end):
+        ############################## Patterns ##############################
+        identifier_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+        reserved_words_pattern = re.compile(
+            r"\b(if|else|do|while|switch|case|double|main|cin|cout|int|real|then|end|until)\b"
+        )
+        number_pattern = re.compile(r"\b\d+\b")
+        aritmethic_op_pattern = re.compile(r"\+|-|\*|/|%|\^")
+        relational_op_pattern = re.compile(r"<|>|!|=")
+        p = re.compile(r"[*]\/|\/[*]|\/\/|\s+|\w+|\W")
+        ######################################################################
+
         # Called everytime the editors text has changed
         self.startStyling(start)
         editor: QsciScintilla = self.parent()
 
         text = editor.text()[start:end]
+
+        token_list = [
+            (token, len(bytearray(token, "utf-8"))) for token in p.findall(text)
+        ]
+
+        is_multiline_comment = False
+        is_inline_comment = False
+
+        if start > 0:
+            previous_style_nr = editor.SendScintilla(editor.SCI_GETSTYLEAT, start - 1)
+            if previous_style_nr == self.COMMENT:
+                is_multiline_comment = True
+
+        for token in token_list:
+            if is_multiline_comment:
+                self.setStyling(token[1], self.COMMENT)
+                if token[0] == "*/":
+                    is_multiline_comment = False
+            elif is_inline_comment:
+                self.setStyling(token[1], self.COMMENT)
+                if token[0] == "\n":
+                    is_inline_comment = False
+            elif reserved_words_pattern.match(token[0]):
+                self.setStyling(token[1], self.KEYWORD)
+            elif identifier_pattern.match(token[0]):
+                self.setStyling(token[1], self.IDENTIFIER)
+            elif number_pattern.match(token[0]):
+                self.setStyling(token[1], self.NUMBER)
+            elif token[0] == "/*":
+                is_multiline_comment = True
+                self.setStyling(token[1], self.COMMENT)
+            elif token[0] == "//":
+                is_inline_comment = True
+                self.setStyling(token[1], self.COMMENT)
+            elif aritmethic_op_pattern.match(token[0]):
+                self.setStyling(token[1], self.ARITHMETIC_OPERATOR)
+            elif relational_op_pattern.match(token[0]):
+                self.setStyling(token[1], self.RELATIONAL_OPERATOR)
+            else:
+                self.setStyling(token[1], self.DEFAULT)
