@@ -254,15 +254,18 @@ def get_lexycal_analysis(file: Path):
                                 else:
                                     break
                             break
-
                         if is_float_recognized:
-                            if tokens[-1] == {"Arithmetic Operator": "-"}:
+                            if (len(tokens) > 0) and tokens[-1] == {
+                                "Arithmetic Operator": "-"
+                            }:
                                 tokens.pop()
                                 number = "-" + number
                                 tokens.append({"Real Number": number})
                                 continue
 
-                            if tokens[-1] == {"Arithmetic Operator": "+"}:
+                            if (len(tokens) > 0) and tokens[-1] == {
+                                "Arithmetic Operator": "+"
+                            }:
                                 tokens.pop()
                                 number = "+" + number
                                 tokens.append({"Real Number": number})
@@ -271,13 +274,17 @@ def get_lexycal_analysis(file: Path):
                             tokens.append({"Real Number": number})
                             continue
 
-                        if tokens[-1] == {"Arithmetic Operator": "-"}:
+                        if (len(tokens) > 0) and tokens[-1] == {
+                            "Arithmetic Operator": "-"
+                        }:
                             tokens.pop()
                             number = "-" + number
                             tokens.append({"Integer Number": number})
                             continue
 
-                        if tokens[-1] == {"Arithmetic Operator": "+"}:  # Ignore the +
+                        if (len(tokens) > 0) and tokens[-1] == {
+                            "Arithmetic Operator": "+"
+                        }:  # Ignore the +
                             tokens.pop()
                             number = "+" + number
                             tokens.append({"Integer Number": number})

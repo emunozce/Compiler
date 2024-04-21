@@ -1,8 +1,6 @@
 """This module contains the Editor class that will be used to write the code"""
 
 import builtins
-import keyword
-import pkgutil
 import re
 import types
 from PyQt5.QtGui import QFont, QColor
@@ -158,7 +156,7 @@ class CustomLexer(QsciLexerCustom):
         number_pattern = re.compile(r"\b\d+\b")
         aritmethic_op_pattern = re.compile(r"\+|-|\*|/|%|\^")
         relational_op_pattern = re.compile(r"<|>|!|=")
-        p = re.compile(r"[*]\/|\/[*]|\/\/|\s+|\w+|\W")
+        p = re.compile(r"//.*?$|/\*|\*/|\b\w+\b|\W", re.MULTILINE)
         ######################################################################
 
         # Called everytime the editors text has changed
@@ -172,22 +170,18 @@ class CustomLexer(QsciLexerCustom):
         ]
 
         is_multiline_comment = False
-        is_inline_comment = False
 
         if start > 0:
             previous_style_nr = editor.SendScintilla(editor.SCI_GETSTYLEAT, start - 1)
             if previous_style_nr == self.COMMENT:
                 is_multiline_comment = True
-
         for token in token_list:
             if is_multiline_comment:
                 self.setStyling(token[1], self.COMMENT)
                 if token[0] == "*/":
                     is_multiline_comment = False
-            elif is_inline_comment:
+            elif token[0].startswith("//"):
                 self.setStyling(token[1], self.COMMENT)
-                if token[0] == "\n":
-                    is_inline_comment = False
             elif reserved_words_pattern.match(token[0]):
                 self.setStyling(token[1], self.KEYWORD)
             elif identifier_pattern.match(token[0]):
@@ -196,9 +190,6 @@ class CustomLexer(QsciLexerCustom):
                 self.setStyling(token[1], self.NUMBER)
             elif token[0] == "/*":
                 is_multiline_comment = True
-                self.setStyling(token[1], self.COMMENT)
-            elif token[0] == "//":
-                is_inline_comment = True
                 self.setStyling(token[1], self.COMMENT)
             elif aritmethic_op_pattern.match(token[0]):
                 self.setStyling(token[1], self.ARITHMETIC_OPERATOR)
