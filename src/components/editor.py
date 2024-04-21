@@ -101,7 +101,7 @@ class CustomLexer(QsciLexerCustom):
 
         # Styles
         self.setColor(QColor(self.color1), self.DEFAULT)
-        self.setColor(QColor("#d19a66"), self.NUMBER)
+        self.setColor(QColor("#fcdf03"), self.NUMBER)
         self.setColor(QColor("#09eded"), self.IDENTIFIER)
         self.setColor(QColor("#fa37b9"), self.KEYWORD)
         self.setColor(QColor("#6ff781"), self.COMMENT)
@@ -186,7 +186,7 @@ class CustomLexer(QsciLexerCustom):
                 self.setStyling(token[1], self.KEYWORD)
             elif identifier_pattern.match(token[0]):
                 self.setStyling(token[1], self.IDENTIFIER)
-            elif number_pattern.match(token[0]):
+            elif number_pattern.match(token[0]) or token[0] == ".":
                 self.setStyling(token[1], self.NUMBER)
             elif token[0] == "/*":
                 is_multiline_comment = True
