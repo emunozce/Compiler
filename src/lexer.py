@@ -32,7 +32,6 @@ def get_lexycal_analysis(file: Path):
         # Flag to check if the current character is inside a block comment
         is_block_comment = False
 
-
         # Store the position of the block comment starting Ln and Col
         is_block_starting = []
 
@@ -82,7 +81,6 @@ def get_lexycal_analysis(file: Path):
                         continue
 
                     if re.match(aritmethic_op_pattern, char) and (not is_block_comment):
-
 
                         if char == "+" and line[index_string + 1] == "+":
                             tokens.append({"Increment Operator": "++"})
