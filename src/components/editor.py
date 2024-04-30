@@ -30,6 +30,7 @@ class Editor(QsciScintilla):
 
         # Brace matching
         self.setBraceMatching(QsciScintilla.SloppyBraceMatch)
+        self.setMatchedBraceBackgroundColor(QColor("#CF571B04"))
 
         # identation
         self.setIndentationGuides(True)
@@ -39,7 +40,8 @@ class Editor(QsciScintilla):
 
         # caret
         self.setCaretLineVisible(True)
-        self.setCaretWidth(2)
+        self.setCaretWidth(1)
+        self.setCaretForegroundColor(QColor("#ffffff"))
         self.setCaretLineBackgroundColor(QColor("#3A0089FF"))
 
         # EOL
@@ -47,11 +49,7 @@ class Editor(QsciScintilla):
         self.setEolVisibility(False)
 
         # Lexer
-
-        self.pylexer = CustomLexer(self)
-        self.pylexer.setDefaultFont(self.window_font)
-
-        self.setLexer(self.pylexer)
+        self.setLexer(CustomLexer(self))
 
         # Line Numbers
         self.setMarginType(0, QsciScintilla.NumberMargin)
