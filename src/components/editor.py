@@ -69,7 +69,7 @@ class Editor(QsciScintilla):
 
 
 class CustomLexer(QsciLexerCustom):
-    """This class is a custom"""
+    """This class is a custom lexer that will be used **ONLY** to highlight the code in the editor."""
 
     def __init__(self, parent):
         super(CustomLexer, self).__init__(parent)
@@ -173,6 +173,7 @@ class CustomLexer(QsciLexerCustom):
             previous_style_nr = editor.SendScintilla(editor.SCI_GETSTYLEAT, start - 1)
             if previous_style_nr == self.COMMENT:
                 is_multiline_comment = True
+
         for token in token_list:
             if is_multiline_comment:
                 self.setStyling(token[1], self.COMMENT)
