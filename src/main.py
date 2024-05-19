@@ -181,6 +181,11 @@ class MainWindow(QMainWindow):
         if self.current_file is not None:
             lexycal_results = get_lexycal_analysis(self.current_file)
             set_lexical_analysis_result(lexycal_results)
+            if lexycal_results[1] == []:
+                self.statusBar().colorCount(1)
+                self.statusBar().showMessage("Compilation successful", 2000)
+            else:
+                self.statusBar().showMessage("Compilation failed", 2000)
 
     def close_tab(self, index):
         """Close the tab at the given index."""
