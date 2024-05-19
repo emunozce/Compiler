@@ -30,7 +30,8 @@ class Editor(QsciScintilla):
 
         # Brace matching
         self.setBraceMatching(QsciScintilla.SloppyBraceMatch)
-        self.setMatchedBraceBackgroundColor(QColor("#CF571B04"))
+        self.setMatchedBraceBackgroundColor(QColor("#669911"))
+        self.setMatchedBraceForegroundColor(QColor("#ffffff"))
 
         # identation
         self.setIndentationGuides(True)
