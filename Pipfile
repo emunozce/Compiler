@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 pyqt5 = "==5.15.7"
 qscintilla = "==2.13.3"
+anytree = "*"
 
 [dev-packages]
 
