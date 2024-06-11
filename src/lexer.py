@@ -9,33 +9,23 @@ from pathlib import Path
 import re
 
 
-def get_lexycal_analysis(file: Path):
-    """
-    Extracts tokens from a file and returns a list of tokens along with their positions.
+class Token:
+    def __init__(self, type, value, lineno, lexpos):
+        self.type = type
+        self.value = value
+        self.lineno = lineno
+        self.lexpos = lexpos
 
-    Args:
-        file (Path): The path to the file to be processed.
+    def __repr__(self):
+        return f"Token({self.type}, {self.value}, {self.lineno}, {self.lexpos})"
 
-    Returns:
-        list: A list containing in [0] a list of dictionaries representing tokens
-        containing the token type and it's value, [1] contains list of dictionaries
-        representing errors and its position in the file.
 
-    Raises:
-        None
-    """
-
+def get_lexical_analysis(file: Path):
     with open(file, "r", encoding="utf-8") as f:
-        tokens = []  # Store the tokens found
-        errors = []  # Store the errors
-
-        # Flag to check if the current character is inside a block comment
+        tokens = []
+        errors = []
         is_block_comment = False
-
-        # Store the position of the block comment starting Ln and Col
         is_block_starting = []
-
-        ############################## Patterns ##############################
         identifier_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
         reserved_words_pattern = re.compile(
             r"\b(if|else|do|while|switch|case|double|main|cin|cout|int|real|then|end|until)\b"
@@ -46,91 +36,82 @@ def get_lexycal_analysis(file: Path):
         logical_op_pattern = re.compile(r"\b(?:and|or)\b")
         aritmethic_op_pattern = re.compile(r"\+|-|\*|/|%|\^")
         relational_op_pattern = re.compile(r"<|>|!")
-        ######################################################################
 
-        for index, line in enumerate(f.readlines()):
-
-            skip_col = 0  # Columns to skip for multiple character tokens
-
-            # Iterate over characters in the line
+        for lineno, line in enumerate(f.readlines(), start=1):
+            skip_col = 0
             for index_string, char in enumerate(line):
+                lexpos = index_string + 1
                 if skip_col == 0:
                     if char == " ":
                         continue
-
                     if char == "\t":
                         continue
-
                     if char == "\n":
                         continue
 
-                    if re.match(symbol_pattern, char) and (not is_block_comment):
-                        tokens.append({"Symbol": char})
+                    if re.match(symbol_pattern, char) and not is_block_comment:
+                        tokens.append(Token("SYMBOL", char, lineno, lexpos))
                         continue
 
-                    if re.match(assignment_pattern, char) and (not is_block_comment):
-
+                    if re.match(assignment_pattern, char) and not is_block_comment:
                         if (index_string + 1 < len(line)) and line[
                             index_string + 1
                         ] == "=":
-                            tokens.append({"Relational Operator": "=="})
+                            tokens.append(Token("EQ", "==", lineno, lexpos))
                             skip_col += 1
                             continue
-
-                        tokens.append({"Assignment": char})
+                        tokens.append(Token("ASSIGN", char, lineno, lexpos))
                         continue
 
-                    if re.match(aritmethic_op_pattern, char) and (not is_block_comment):
-
+                    if re.match(aritmethic_op_pattern, char) and not is_block_comment:
                         if char == "+" and line[index_string + 1] == "+":
-                            tokens.append({"Increment Operator": "++"})
+                            tokens.append(
+                                Token("INCREMENT_OPERATOR", "++", lineno, lexpos)
+                            )
                             skip_col += 1
                             continue
-
                         if char == "-" and line[index_string + 1] == "-":
-                            tokens.append({"Decrement Operator": "--"})
+                            tokens.append(
+                                Token("DECREMENT_OPERATOR", "--", lineno, lexpos)
+                            )
                             skip_col += 1
                             continue
-
                         if (
                             char == "/"
                             and (index_string + 1 < len(line))
                             and (line[index_string + 1] == "*")
                         ):
-                            is_block_starting = [index + 1, index_string + 1]
+                            is_block_starting = [lineno, lexpos]
                             is_block_comment = True
                             break
-
                         if (
                             char == "/"
                             and (index_string + 1 < len(line))
                             and line[index_string + 1] == "/"
                         ):
                             break
-
-                        tokens.append({"Arithmetic Operator": char})
+                        tokens.append(
+                            Token("ARITHMETIC_OPERATOR", char, lineno, lexpos)
+                        )
                         continue
 
-                    if re.match(relational_op_pattern, char) and (not is_block_comment):
-
+                    if re.match(relational_op_pattern, char) and not is_block_comment:
                         if (index_string + 1 < len(line)) and line[
                             index_string + 1
                         ] == "=":
-                            tokens.append({"Relational Operator": char + "="})
+                            tokens.append(
+                                Token("RELATIONAL_OPERATOR", char + "=", lineno, lexpos)
+                            )
                             skip_col += 1
                             continue
-                        tokens.append({"Relational Operator": char})
+                        tokens.append(
+                            Token("RELATIONAL_OPERATOR", char, lineno, lexpos)
+                        )
                         continue
 
-                    if re.match(identifier_pattern, char) and (
-                        not is_block_comment
-                    ):  # Check if it is an identifier, a reserved word or a logical operator
-                        identifier = ""
-                        identifier += char  # Add the first character to the identifier
-                        rest_of_string = line[
-                            index_string + 1 :
-                        ]  # Get the rest of the string
-
+                    if re.match(identifier_pattern, char) and not is_block_comment:
+                        identifier = char
+                        rest_of_string = line[index_string + 1 :]
                         while True:
                             for c in rest_of_string:
                                 if re.match(identifier_pattern, c):
@@ -141,22 +122,24 @@ def get_lexycal_analysis(file: Path):
                             break
 
                         if re.match(logical_op_pattern, identifier):
-                            tokens.append({"Logical Operator": identifier})
+                            tokens.append(
+                                Token("LOGICAL_OPERATOR", identifier, lineno, lexpos)
+                            )
                             continue
 
                         if re.match(reserved_words_pattern, identifier):
-                            tokens.append({"Reserved Word": identifier})
+                            tokens.append(
+                                Token("RESERVED_WORD", identifier, lineno, lexpos)
+                            )
                             continue
 
-                        tokens.append({"Identifier": identifier})
+                        tokens.append(Token("IDENTIFIER", identifier, lineno, lexpos))
                         continue
 
-                    if re.match(number_pattern, char) and (not is_block_comment):
-                        number = ""
-                        number += char
+                    if re.match(number_pattern, char) and not is_block_comment:
+                        number = char
                         rest_of_string = line[index_string + 1 :]
                         is_float_recognized = False
-
                         while True:
                             for i_c, c in enumerate(rest_of_string):
                                 if re.match(number_pattern, c):
@@ -176,50 +159,31 @@ def get_lexycal_analysis(file: Path):
                                     break
                             break
                         if is_float_recognized:
-                            if (len(tokens) > 0) and tokens[-1] == {
-                                "Arithmetic Operator": "-"
-                            }:
+                            if (
+                                tokens
+                                and tokens[-1].type == "ARITHMETIC_OPERATOR"
+                                and tokens[-1].value == "-"
+                            ):
                                 tokens.pop()
                                 number = "-" + number
-                                tokens.append({"Real Number": number})
-                                continue
-
-                            if (len(tokens) > 0) and tokens[-1] == {
-                                "Arithmetic Operator": "+"
-                            }:
-                                tokens.pop()
-                                number = "+" + number
-                                tokens.append({"Real Number": number})
-                                continue
-
-                            tokens.append({"Real Number": number})
+                            tokens.append(Token("REAL_NUMBER", number, lineno, lexpos))
                             continue
-
-                        if (len(tokens) > 0) and tokens[-1] == {
-                            "Arithmetic Operator": "-"
-                        }:
+                        if (
+                            tokens
+                            and tokens[-1].type == "ARITHMETIC_OPERATOR"
+                            and tokens[-1].value == "-"
+                        ):
                             tokens.pop()
                             number = "-" + number
-                            tokens.append({"Integer Number": number})
-                            continue
-
-                        if (len(tokens) > 0) and tokens[-1] == {
-                            "Arithmetic Operator": "+"
-                        }:  # Ignore the +
-                            tokens.pop()
-                            number = "+" + number
-                            tokens.append({"Integer Number": number})
-                            continue
-
-                        tokens.append({"Integer Number": number})
+                        tokens.append(Token("INTEGER_NUMBER", number, lineno, lexpos))
                         continue
 
                     if not is_block_comment:
                         errors.append(
                             {
                                 "Error": char,
-                                "Ln": index + 1,
-                                "Col": index_string + 1,
+                                "Ln": lineno,
+                                "Col": lexpos,
                             }
                         )
 
@@ -241,7 +205,7 @@ def get_lexycal_analysis(file: Path):
                 }
             )
 
-        return [tokens, errors]
+        return tokens, errors
 
 
 if __name__ == "__main__":
@@ -257,7 +221,7 @@ if __name__ == "__main__":
         else:
             # bytes = file_path.read_bytes()
             # print(bytes)
-            tkns, errs = get_lexycal_analysis(file_path)
+            tkns, errs = get_lexical_analysis(file_path)
 
             for token in tkns:
                 print(f"{token}")

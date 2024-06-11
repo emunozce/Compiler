@@ -1,0 +1,98 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    DECREMENT_OPERATOR
+    EQ
+    INCREMENT_OPERATOR
+    SYMBOL
+
+Grammar
+
+Rule 0     S' -> programa
+Rule 1     programa -> RESERVED_WORD LPAREN RPAREN LBRACE listaDeclaracion RBRACE
+Rule 2     listaDeclaracion -> listaDeclaracion declaracion
+Rule 3     listaDeclaracion -> declaracion
+Rule 4     declaracion -> declaracionVariable
+Rule 5     declaracion -> listaSentencias
+Rule 6     declaracionVariable -> tipo identificador SEMICOLON
+Rule 7     identificador -> identificador COMMA IDENTIFIER
+Rule 8     identificador -> IDENTIFIER
+Rule 9     tipo -> RESERVED_WORD
+Rule 10    listaSentencias -> listaSentencias sentencia
+Rule 11    listaSentencias -> empty
+Rule 12    sentencia -> seleccion
+Rule 13    sentencia -> iteracion
+Rule 14    sentencia -> repeticion
+Rule 15    sentencia -> sentIn
+Rule 16    sentencia -> sentOut
+Rule 17    sentencia -> asignacion
+Rule 18    asignacion -> IDENTIFIER ASSIGNMENT sentExpresion
+Rule 19    sentExpresion -> expresion SEMICOLON
+Rule 20    sentExpresion -> SEMICOLON
+Rule 21    seleccion -> RESERVED_WORD expresion sentencia RESERVED_WORD
+Rule 22    seleccion -> RESERVED_WORD expresion sentencia RESERVED_WORD sentencia RESERVED_WORD
+Rule 23    iteracion -> RESERVED_WORD expresion sentencia RESERVED_WORD
+Rule 24    repeticion -> RESERVED_WORD sentencia RESERVED_WORD expresion
+Rule 25    sentIn -> RESERVED_WORD IDENTIFIER SEMICOLON
+Rule 26    sentOut -> RESERVED_WORD expresion SEMICOLON
+Rule 27    expresion -> expresionSimple RELATIONAL_OPERATOR expresionSimple
+Rule 28    expresion -> expresionSimple
+Rule 29    expresionSimple -> expresionSimple LOGICAL_OPERATOR termino
+Rule 30    expresionSimple -> termino
+Rule 31    termino -> termino ARITHMETIC_OPERATOR factor
+Rule 32    termino -> factor
+Rule 33    factor -> factor ARITHMETIC_OPERATOR componente
+Rule 34    factor -> componente
+Rule 35    componente -> LPAREN expresion RPAREN
+Rule 36    componente -> INTEGER_NUMBER
+Rule 37    componente -> REAL_NUMBER
+Rule 38    componente -> IDENTIFIER
+Rule 39    empty -> <empty>
+
+Terminals, with rules where they appear
+
+ARITHMETIC_OPERATOR  : 31 33
+ASSIGNMENT           : 18
+DECREMENT_OPERATOR   : 
+EQ                   : 
+IDENTIFIER           : 7 8 18 25 38
+INCREMENT_OPERATOR   : 
+INTEGER_NUMBER       : 36
+LOGICAL_OPERATOR     : 29
+REAL_NUMBER          : 37
+RELATIONAL_OPERATOR  : 27
+RESERVED_WORD        : 1 9 21 21 22 22 22 23 23 24 24 25 26
+SYMBOL               : 
+error                : 
+
+Nonterminals, with rules where they appear
+
+COMMA                : 7
+LBRACE               : 1
+LPAREN               : 1 35
+RBRACE               : 1
+RPAREN               : 1 35
+SEMICOLON            : 6 19 20 25 26
+asignacion           : 17
+componente           : 33 34
+declaracion          : 2 3
+declaracionVariable  : 4
+empty                : 11
+expresion            : 19 21 22 23 24 26 35
+expresionSimple      : 27 27 28 29
+factor               : 31 32 33
+identificador        : 6 7
+iteracion            : 13
+listaDeclaracion     : 1 2
+listaSentencias      : 5 10
+programa             : 0
+repeticion           : 14
+seleccion            : 12
+sentExpresion        : 18
+sentIn               : 15
+sentOut              : 16
+sentencia            : 10 21 22 22 23 24
+termino              : 29 30 31
+tipo                 : 6
+

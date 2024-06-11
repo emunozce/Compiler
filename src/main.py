@@ -26,7 +26,7 @@ from components.editor import Editor
 from components.menu import set_up_menu
 from components.dock_panels import set_up_dock_panels, set_lexical_analysis_result
 from components.side_bar import set_up_sidebar
-from lexer import get_lexycal_analysis
+from lexer import get_lexical_analysis
 
 
 class MainWindow(QMainWindow):
@@ -179,7 +179,7 @@ class MainWindow(QMainWindow):
     def compile(self):
         """Compile the current file."""
         if self.current_file is not None:
-            lexycal_results = get_lexycal_analysis(self.current_file)
+            lexycal_results = get_lexical_analysis(self.current_file)
             set_lexical_analysis_result(lexycal_results)
             if lexycal_results[1] == []:
                 self.statusBar().colorCount(1)
