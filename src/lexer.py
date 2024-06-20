@@ -50,7 +50,7 @@ def get_lexical_analysis(file: Path):
                         continue
 
                     if re.match(symbol_pattern, char) and not is_block_comment:
-                        tokens.append(Token("SYMBOL", char, lineno, lexpos))
+                        identify_symbol(char, tokens, lineno, lexpos)
                         continue
 
                     if re.match(assignment_pattern, char) and not is_block_comment:
@@ -206,6 +206,21 @@ def get_lexical_analysis(file: Path):
             )
 
         return tokens, errors
+
+
+def identify_symbol(char: str, tokens: list, lineno: int, lexpos: int):
+    if char == "(":
+        tokens.append(Token("LPAREN", char, lineno, lexpos))
+    if char == ")":
+        tokens.append(Token("RPAREN", char, lineno, lexpos))
+    if char == ",":
+        tokens.append(Token("COMMA", char, lineno, lexpos))
+    if char == "{":
+        tokens.append(Token("LBRACE", char, lineno, lexpos))
+    if char == "}":
+        tokens.append(Token("RBRACE", char, lineno, lexpos))
+    if char == ";":
+        tokens.append(Token("SEMICOLON", char, lineno, lexpos))
 
 
 if __name__ == "__main__":
