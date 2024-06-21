@@ -159,22 +159,55 @@ def get_lexical_analysis(file: Path):
                                     break
                             break
                         if is_float_recognized:
-                            if (
-                                tokens
-                                and tokens[-1].type == "ARITHMETIC_OPERATOR"
-                                and tokens[-1].value == "-"
-                            ):
-                                tokens.pop()
-                                number = "-" + number
+                            if tokens and tokens[-1].value == "-":
+                                if (
+                                    len(tokens) >= 2
+                                    and tokens[-2].value == "("
+                                    or tokens[-2].type
+                                    not in (
+                                        "INTEGER_NUMBER",
+                                        "REAL_NUMBER",
+                                        "NEGATIVE_INTEGER_NUMBER",
+                                        "NEGATIVE_REAL_NUMBER",
+                                    )
+                                ):
+                                    tokens.pop()
+                                    number = "-" + number
+                                    tokens.append(
+                                        Token(
+                                            "NEGATIVE_REAL_NUMBER",
+                                            number,
+                                            lineno,
+                                            lexpos,
+                                        )
+                                    )
+                                    continue
                             tokens.append(Token("REAL_NUMBER", number, lineno, lexpos))
                             continue
-                        if (
-                            tokens
-                            and tokens[-1].type == "ARITHMETIC_OPERATOR"
-                            and tokens[-1].value == "-"
-                        ):
-                            tokens.pop()
-                            number = "-" + number
+                        if tokens and tokens[-1].value == "-":
+                            if tokens and tokens[-1].value == "-":
+                                if (
+                                    len(tokens) >= 2
+                                    and tokens[-2].value == "("
+                                    or tokens[-2].type
+                                    not in (
+                                        "INTEGER_NUMBER",
+                                        "REAL_NUMBER",
+                                        "NEGATIVE_INTEGER_NUMBER",
+                                        "NEGATIVE_REAL_NUMBER",
+                                    )
+                                ):
+                                    tokens.pop()
+                                    number = "-" + number
+                                    tokens.append(
+                                        Token(
+                                            "NEGATIVE_INTEGER_NUMBER",
+                                            number,
+                                            lineno,
+                                            lexpos,
+                                        )
+                                    )
+                                    continue
                         tokens.append(Token("INTEGER_NUMBER", number, lineno, lexpos))
                         continue
 
@@ -224,6 +257,7 @@ def identify_symbol(char: str, tokens: list, lineno: int, lexpos: int):
 
 
 if __name__ == "__main__":
+    # print(48 - 8 * 323 * (-2123 - 200 % 2))
     args = sys.argv
     if len(args) < 2:
         print("No arguments provided")
@@ -234,8 +268,6 @@ if __name__ == "__main__":
         if not file_path.exists():
             print("File does not exist")
         else:
-            # bytes = file_path.read_bytes()
-            # print(bytes)
             tkns, errs = get_lexical_analysis(file_path)
 
             for token in tkns:
