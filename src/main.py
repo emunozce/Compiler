@@ -3,6 +3,8 @@
 import sys
 import os
 from pathlib import Path
+from tree_example import Parser
+from lexer import get_lexical_analysis
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -24,9 +26,12 @@ from PyQt5.Qsci import QsciScintilla
 
 from components.editor import Editor
 from components.menu import set_up_menu
-from components.dock_panels import set_up_dock_panels, set_lexical_analysis_result
+from components.dock_panels import (
+    set_up_dock_panels,
+    set_lexical_analysis_result,
+    set_syntactic_analysis_result,
+)
 from components.side_bar import set_up_sidebar
-from lexer import get_lexical_analysis
 
 
 class MainWindow(QMainWindow):
@@ -182,7 +187,8 @@ class MainWindow(QMainWindow):
             lexycal_results = get_lexical_analysis(self.current_file)
             set_lexical_analysis_result(lexycal_results)
             if lexycal_results[1] == []:
-                self.statusBar().colorCount(1)
+                parser = Parser(lexycal_results[0])
+                set_syntactic_analysis_result(parser.parse())
                 self.statusBar().showMessage("Compilation successful", 2000)
             else:
                 self.statusBar().showMessage("Compilation failed", 2000)
