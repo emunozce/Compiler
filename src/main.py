@@ -3,6 +3,8 @@
 import sys
 import os
 from pathlib import Path
+from parser_s import Parser
+from gui import ASTViewer
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -28,9 +30,16 @@ from components.dock_panels import set_up_dock_panels, set_lexical_analysis_resu
 from components.side_bar import set_up_sidebar
 from lexer import get_lexycal_analysis
 
+def print_ast(node, level=0):
+    indent = "  " * level
+    print(f"{indent}{node.node_type}({node.value})")
+    for child in node.children:
+        print_ast(child, level + 1)
 
 class MainWindow(QMainWindow):
     """Main window of the application."""
+
+    
 
     def __init__(self):  # Constructor
         super().__init__()  # Call the constructor of the parent class
@@ -181,11 +190,23 @@ class MainWindow(QMainWindow):
         if self.current_file is not None:
             lexycal_results = get_lexycal_analysis(self.current_file)
             set_lexical_analysis_result(lexycal_results)
-            if lexycal_results[1] == []:
-                self.statusBar().colorCount(1)
-                self.statusBar().showMessage("Compilation successful", 2000)
+            tkns, errs = get_lexycal_analysis(self.current_file)
+            if not errs:  # Check if there are no lexical errors
+                parser = Parser(tkns)
+                try:
+                    ast = parser.parse()
+                    print("Parsing successful!")
+                    app = ASTViewer(ast)
+                    app.mainloop()
+                    self.statusBar().showMessage("Compilation successful", 2000)
+                except SyntaxError as e:
+                    print(f"Syntax error: {e}")
+                    self.statusBar().showMessage(f"Compilation failed: {e}", 2000)
             else:
-                self.statusBar().showMessage("Compilation failed", 2000)
+                for error in errs:
+                    print(f"Lexical error: {error}")
+                self.statusBar().showMessage("Compilation failed due to lexical errors", 2000)
+
 
     def close_tab(self, index):
         """Close the tab at the given index."""
