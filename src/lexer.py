@@ -231,8 +231,8 @@ def get_lexical_analysis(file: Path):
                 Token(
                     "Error",
                     "Block comment not closed",
-                    lineno,
-                    lexpos,
+                    is_block_starting[0],
+                    is_block_starting[1],
                 )
             )
 
