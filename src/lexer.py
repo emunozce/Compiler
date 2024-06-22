@@ -28,7 +28,7 @@ def get_lexical_analysis(file: Path):
         is_block_starting = []
         identifier_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
         reserved_words_pattern = re.compile(
-            r"\b(if|else|do|while|switch|case|double|main|cin|cout|int|real|then|end|until)\b"
+            r"\b(if|else|do|while|switch|case|double|main|cin|cout|int|float|then|end|until)\b"
         )
         number_pattern = re.compile(r"\b\d+\b")
         symbol_pattern = re.compile(r"\(|\)|,|{|}|;")
@@ -90,23 +90,19 @@ def get_lexical_analysis(file: Path):
                             and line[index_string + 1] == "/"
                         ):
                             break
-                        tokens.append(
-                            Token("ARITHMETIC_OPERATOR", char, lineno, lexpos)
-                        )
+                        identify_aritmethic_operator(char, tokens, lineno, lexpos)
                         continue
 
                     if re.match(relational_op_pattern, char) and not is_block_comment:
                         if (index_string + 1 < len(line)) and line[
                             index_string + 1
                         ] == "=":
-                            tokens.append(
-                                Token("RELATIONAL_OPERATOR", char + "=", lineno, lexpos)
+                            identify_relational_operator(
+                                char + "=", tokens, lineno, lexpos
                             )
                             skip_col += 1
                             continue
-                        tokens.append(
-                            Token("RELATIONAL_OPERATOR", char, lineno, lexpos)
-                        )
+                        identify_relational_operator(char, tokens, lineno, lexpos)
                         continue
 
                     if re.match(identifier_pattern, char) and not is_block_comment:
@@ -122,15 +118,13 @@ def get_lexical_analysis(file: Path):
                             break
 
                         if re.match(logical_op_pattern, identifier):
-                            tokens.append(
-                                Token("LOGICAL_OPERATOR", identifier, lineno, lexpos)
+                            identify_logical_operator(
+                                identifier, tokens, lineno, lexpos
                             )
                             continue
 
                         if re.match(reserved_words_pattern, identifier):
-                            tokens.append(
-                                Token("RESERVED_WORD", identifier, lineno, lexpos)
-                            )
+                            identify_reserved_words(identifier, tokens, lineno, lexpos)
                             continue
 
                         tokens.append(Token("IDENTIFIER", identifier, lineno, lexpos))
@@ -213,11 +207,12 @@ def get_lexical_analysis(file: Path):
 
                     if not is_block_comment:
                         errors.append(
-                            {
-                                "Error": char,
-                                "Ln": lineno,
-                                "Col": lexpos,
-                            }
+                            Token(
+                                "Error",
+                                f"Invalid character => {char}",
+                                lineno,
+                                lexpos,
+                            )
                         )
 
                     if is_block_comment:
@@ -233,9 +228,12 @@ def get_lexical_analysis(file: Path):
 
         if is_block_comment:
             errors.append(
-                {
-                    "Error": f"Block comment not closed at Ln: {is_block_starting[0]}, Col {is_block_starting[1]}"
-                }
+                Token(
+                    "Error",
+                    "Block comment not closed",
+                    lineno,
+                    lexpos,
+                )
             )
 
         return tokens, errors
@@ -254,6 +252,74 @@ def identify_symbol(char: str, tokens: list, lineno: int, lexpos: int):
         tokens.append(Token("RBRACE", char, lineno, lexpos))
     if char == ";":
         tokens.append(Token("SEMICOLON", char, lineno, lexpos))
+
+
+def identify_aritmethic_operator(char: str, tokens: list, lineno: int, lexpos: int):
+    if char == "+":
+        tokens.append(Token("PLUS", char, lineno, lexpos))
+    if char == "-":
+        tokens.append(Token("MINUS", char, lineno, lexpos))
+    if char == "*":
+        tokens.append(Token("TIMES", char, lineno, lexpos))
+    if char == "/":
+        tokens.append(Token("DIVIDE", char, lineno, lexpos))
+    if char == "%":
+        tokens.append(Token("MOD", char, lineno, lexpos))
+    if char == "^":
+        tokens.append(Token("POW", char, lineno, lexpos))
+
+
+def identify_relational_operator(char: str, tokens: list, lineno: int, lexpos: int):
+    if char == "<":
+        tokens.append(Token("LT", char, lineno, lexpos))
+    if char == ">":
+        tokens.append(Token("GT", char, lineno, lexpos))
+    if char == "!":
+        tokens.append(Token("NOT", char, lineno, lexpos))
+    if char == "<=":
+        tokens.append(Token("LE", char, lineno, lexpos))
+    if char == ">=":
+        tokens.append(Token("GE", char, lineno, lexpos))
+
+
+def identify_logical_operator(char: str, tokens: list, lineno: int, lexpos: int):
+    if char == "and":
+        tokens.append(Token("AND", char, lineno, lexpos))
+    if char == "or":
+        tokens.append(Token("OR", char, lineno, lexpos))
+
+
+def identify_reserved_words(char: str, tokens: list, lineno: int, lexpos: int):
+    if char == "if":
+        tokens.append(Token("IF", char, lineno, lexpos))
+    if char == "else":
+        tokens.append(Token("ELSE", char, lineno, lexpos))
+    if char == "do":
+        tokens.append(Token("DO", char, lineno, lexpos))
+    if char == "while":
+        tokens.append(Token("WHILE", char, lineno, lexpos))
+    if char == "switch":
+        tokens.append(Token("SWITCH", char, lineno, lexpos))
+    if char == "case":
+        tokens.append(Token("CASE", char, lineno, lexpos))
+    if char == "double":
+        tokens.append(Token("DOUBLE", char, lineno, lexpos))
+    if char == "main":
+        tokens.append(Token("MAIN", char, lineno, lexpos))
+    if char == "cin":
+        tokens.append(Token("CIN", char, lineno, lexpos))
+    if char == "cout":
+        tokens.append(Token("COUT", char, lineno, lexpos))
+    if char == "int":
+        tokens.append(Token("INT", char, lineno, lexpos))
+    if char == "float":
+        tokens.append(Token("FLOAT", char, lineno, lexpos))
+    if char == "then":
+        tokens.append(Token("THEN", char, lineno, lexpos))
+    if char == "end":
+        tokens.append(Token("END", char, lineno, lexpos))
+    if char == "until":
+        tokens.append(Token("UNTIL", char, lineno, lexpos))
 
 
 if __name__ == "__main__":
