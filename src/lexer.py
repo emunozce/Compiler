@@ -4,7 +4,6 @@
     with their errors and it's positions.
 """
 
-import sys
 from pathlib import Path
 import re
 
@@ -28,7 +27,7 @@ def get_lexical_analysis(file: Path):
         is_block_starting = []
         identifier_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
         reserved_words_pattern = re.compile(
-            r"\b(if|else|do|while|switch|case|double|main|cin|cout|int|float|then|end|until)\b"
+            r"\b(if|else|do|while|switch|case|double|main|cin|cout|int|float)\b"
         )
         number_pattern = re.compile(r"\b\d+\b")
         symbol_pattern = re.compile(r"\(|\)|,|{|}|;")
@@ -280,6 +279,8 @@ def identify_relational_operator(char: str, tokens: list, lineno: int, lexpos: i
         tokens.append(Token("LE", char, lineno, lexpos))
     if char == ">=":
         tokens.append(Token("GE", char, lineno, lexpos))
+    if char == "!=":
+        tokens.append(Token("NE", char, lineno, lexpos))
 
 
 def identify_logical_operator(char: str, tokens: list, lineno: int, lexpos: int):
@@ -314,16 +315,11 @@ def identify_reserved_words(char: str, tokens: list, lineno: int, lexpos: int):
         tokens.append(Token("INT", char, lineno, lexpos))
     if char == "float":
         tokens.append(Token("FLOAT", char, lineno, lexpos))
-    if char == "then":
-        tokens.append(Token("THEN", char, lineno, lexpos))
-    if char == "end":
-        tokens.append(Token("END", char, lineno, lexpos))
-    if char == "until":
-        tokens.append(Token("UNTIL", char, lineno, lexpos))
 
 
 if __name__ == "__main__":
-    # print(48 - 8 * 323 * (-2123 - 200 % 2))
+    import sys
+
     args = sys.argv
     if len(args) < 2:
         print("No arguments provided")
