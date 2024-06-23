@@ -1,6 +1,10 @@
 main {
     int x, y, z;
     float a, b, c;
+    a = 34.53;
+    b = 65.23;
+    x = 2;
+    z = 5;
     if ((y == 24) and (x <= 13)) {
         c = 3;
     }
