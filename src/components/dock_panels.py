@@ -145,7 +145,7 @@ def set_lexical_analysis_result(results: list[str]):
 def set_syntactic_analysis_result(ast):
     """Set the results of the sintactic analysis in the dock panel"""
     syntactic[0].clear()
-    root_item = QTreeWidgetItem(syntactic[0], [ast.name])
+    root_item = QTreeWidgetItem(syntactic[0], [ast.value])
     for child in ast.children:
         add_tree_item(root_item, child)
         syntactic[0].expandAll()
