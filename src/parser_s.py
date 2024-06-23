@@ -37,7 +37,6 @@ class Parser:
         return self.program()
 
     def program(self):
-        token = self.current_token
         self.eat("MAIN")
         self.eat("LBRACE")
         declarations = self.declaration_list()
@@ -45,7 +44,7 @@ class Parser:
         self.eat("RBRACE")
         return Node(
             name="Program",
-            value=token.value,
+            value="main",
             children=declarations + statements,
         )
 
@@ -189,7 +188,8 @@ class Parser:
             )
         else:
             return Node(
-                "If",
+                name="If",
+                value="if",
                 children=[
                     condition,
                     Node(name="TrueBranch", value="true_branch", children=true_branch),
@@ -215,20 +215,21 @@ class Parser:
         self.eat("LBRACE")
         statements = self.sentence_list()
         self.eat("RBRACE")
-        return Node(name="DoWhile", value="Do While", children=[condition] + statements)
+        return Node(name="DoWhile", value="do_while", children=[condition] + statements)
 
     def cin_sentence(self):
-        self.eat("CIN")
         identifier = self.current_token.value
+        self.eat("CIN")
         self.eat("IDENTIFIER")
         self.eat("SEMICOLON")
         return Node(name="Input", value=identifier)
 
     def cout_sentence(self):
+        identifier = self.current_token.value
         self.eat("COUT")
         expression = self.expression()
         self.eat("SEMICOLON")
-        return Node(name="Output", children=[expression])
+        return Node(name="Output", value=identifier, children=[expression])
 
     def expression(self):
         node = self.logical_expression()

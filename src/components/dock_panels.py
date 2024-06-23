@@ -11,7 +11,6 @@ from PyQt5.QtWidgets import (
     QTreeWidgetItem,
 )
 
-from tree_example import Parser
 
 lexer = []  # List to store the widgets of the lexer dock panel
 syntactic = []  # List to store the widgets of the syntactic dock panel
@@ -153,7 +152,8 @@ def set_syntactic_analysis_result(ast):
 
 
 def add_tree_item(parent, node):
-    item = QTreeWidgetItem(parent, [node.name])
+    """Add a tree item to the tree widget"""
+    item = QTreeWidgetItem(parent, [node.value])
     for child in node.children:
         add_tree_item(item, child)
     return item

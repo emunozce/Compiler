@@ -3,7 +3,7 @@
 import sys
 import os
 from pathlib import Path
-from tree_example import Parser
+from parser_s import Parser
 from lexer import get_lexical_analysis
 
 from PyQt5.QtWidgets import (
