@@ -37,6 +37,7 @@ class Parser:
         return self.program()
 
     def program(self):
+        token = self.current_token
         self.eat("MAIN")
         self.eat("LBRACE")
         declarations = self.declaration_list()
@@ -44,7 +45,7 @@ class Parser:
         self.eat("RBRACE")
         return Node(
             name="Program",
-            value="main",
+            value=token.value,
             children=declarations + statements,
         )
 
