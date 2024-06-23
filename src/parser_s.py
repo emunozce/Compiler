@@ -1,5 +1,4 @@
 from lexer import Token
-from pathlib import Path
 from anytree import NodeMixin, RenderTree
 
 
@@ -209,14 +208,14 @@ class Parser:
 
     def do_while_loop_sentence(self):
         self.eat("DO")
+        self.eat("LBRACE")
+        statements = self.sentence_list()
+        self.eat("RBRACE")
         self.eat("WHILE")
         self.eat("LPAREN")
         condition = self.expression()
         self.eat("RPAREN")
-        self.eat("LBRACE")
-        statements = self.sentence_list()
-        self.eat("RBRACE")
-        return Node(name="DoWhile", value="do_while", children=[condition] + statements)
+        return Node(name="DoWhile", value="do_while", children=statements + [condition])
 
     def cin_sentence(self):
         identifier = self.current_token.value
@@ -328,8 +327,9 @@ class Parser:
 
 # Example usage
 if __name__ == "__main__":
-    from anytree.exporter import DotExporter
     import sys
+    from pathlib import Path
+    from anytree.exporter import DotExporter
     from lexer import get_lexical_analysis
 
     args = sys.argv
@@ -342,8 +342,6 @@ if __name__ == "__main__":
         if not file_path.exists():
             print("File does not exist")
         else:
-            # bytes = file_path.read_bytes()
-            # print(bytes)
             tkns, errs = get_lexical_analysis(file_path)
 
             parser = Parser(tkns)

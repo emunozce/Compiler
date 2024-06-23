@@ -1,91 +1,334 @@
-from pathlib import Path
-import sys
-from anytree import Node, RenderTree
+from lexer import Token
+from anytree import NodeMixin, RenderTree
+
+
+class Node(NodeMixin):
+    def __init__(self, name, value=None, children=None):
+        self.name = name
+        self.value = value
+        if children:
+            self.children = children
+
+    def __str__(self):
+        if self.value:
+            return f"{self.value}"
+        else:
+            return f"{self.name}"
 
 
 class Parser:
-    def __init__(self, tokens):
+    def __init__(self, tokens: list[Token]):
         self.tokens = tokens
-        self.pos = 0
-        self.current_token = self.tokens[self.pos] if self.tokens else None
-
-    def parse(self):
-        return self.expression()
+        self.current_token_index = 0
+        self.current_token = self.tokens[self.current_token_index]
 
     def eat(self, token_type):
-        if self.current_token and self.current_token.type == token_type:
-            self.pos += 1
-            self.current_token = (
-                self.tokens[self.pos] if self.pos < len(self.tokens) else None
-            )
+        if self.current_token.type == token_type:
+            self.current_token_index += 1
+            if self.current_token_index < len(self.tokens):
+                self.current_token = self.tokens[self.current_token_index]
         else:
             raise Exception(
-                f"Expected token {token_type}, got {self.current_token.type}"
+                f"Unexpected token {self.current_token.type}, expected {token_type}"
             )
 
+    def parse(self):
+        return self.program()
+
+    def program(self):
+        token = self.current_token
+        self.eat("MAIN")
+        self.eat("LBRACE")
+        declarations = self.declaration_list()
+        statements = self.sentence_list()
+        self.eat("RBRACE")
+        return Node(
+            name="Program",
+            value=token.value,
+            children=declarations + statements,
+        )
+
+    def declaration_list(self):
+        declarations = []
+        while self.current_token and self.current_token.type in [
+            "INT",
+            "DOUBLE",
+            "FLOAT",
+        ]:
+            declarations.append(self.declaration_statement())
+        return declarations
+
+    def declaration_statement(self):
+        if self.current_token.type == "INT":
+            return self.variable_declaration("int")
+        elif self.current_token.type == "DOUBLE":
+            return self.variable_declaration("double")
+        elif self.current_token.type == "FLOAT":
+            return self.variable_declaration("float")
+        else:
+            return self.sentence()
+
+    def variable_declaration(self, type):
+        self.eat(type.upper())
+        ids = self.identifier()
+        self.eat("SEMICOLON")
+        return Node(name="VariableDeclaration", value=type, children=ids)
+
+    def identifier(self):
+        ids = []
+        ids.append(self.current_token.value)
+        self.eat("IDENTIFIER")
+        while self.current_token and self.current_token.type == "COMMA":
+            self.eat("COMMA")
+            ids.append(self.current_token.value)
+            self.eat("IDENTIFIER")
+        return [Node(name="Identifier", value=id) for id in ids]
+
+    def sentence_list(self):
+        statements = []
+        while self.current_token and self.current_token.type != "RBRACE":
+            statements.append(self.sentence())
+        return statements
+
+    def sentence(self):
+        if self.current_token.type == "IF":
+            return self.if_statement()
+        elif self.current_token.type == "WHILE":
+            return self.while_loop_sentence()
+        elif self.current_token.type == "DO":
+            return self.do_while_loop_sentence()
+        elif self.current_token.type == "CIN":
+            return self.cin_sentence()
+        elif self.current_token.type == "COUT":
+            return self.cout_sentence()
+        elif self.current_token.type == "IDENTIFIER":
+            return self.assignment_or_increment_decrement()
+        else:
+            raise Exception(f"Unexpected token {self.current_token.type}")
+
+    def assignment_or_increment_decrement(self):
+        identifier_token = self.current_token.value
+        self.eat("IDENTIFIER")
+
+        if self.current_token.type == "ASSIGN":
+            assign_token = self.current_token
+            self.eat("ASSIGN")
+            expression = self.sent_expression()
+            self.eat("SEMICOLON")
+            return Node(
+                "Assignment",
+                value=assign_token.value,
+                children=[Node("Identifier", value=identifier_token), expression],
+            )
+        elif self.current_token.type == "INCREMENT_OPERATOR":
+            operator_token = self.current_token
+            self.eat("INCREMENT_OPERATOR")
+            self.eat("SEMICOLON")
+            return Node(
+                name="Increment",
+                value=operator_token.value,
+                children=[Node(name="Identifier", value=identifier_token)],
+            )
+        elif self.current_token.type == "DECREMENT_OPERATOR":
+            operator_token = self.current_token
+            self.eat("DECREMENT_OPERATOR")
+            self.eat("SEMICOLON")
+            return Node(
+                name="Decrement",
+                value=operator_token.value,
+                children=[Node("Identifier", value=identifier_token)],
+            )
+        else:
+            raise Exception(f"Unexpected token {self.current_token.type}")
+
+    def assignment(self):
+        identifier_token = self.current_token.value
+        self.eat("IDENTIFIER")
+        assign_token = self.current_token
+        self.eat("ASSIGN")
+        expression = self.sent_expression()
+        self.eat("SEMICOLON")
+        return Node(
+            name="Assignment",
+            value=assign_token.value,
+            children=[Node(name="Identifier", value=identifier_token), expression],
+        )
+
+    def sent_expression(self):
+        if self.current_token.type == "SEMICOLON":
+            self.eat("SEMICOLON")
+            return Node("EmptyStatement")
+        else:
+            return self.expression()
+
+    def if_statement(self):
+        self.eat("IF")
+        self.eat("LPAREN")
+        condition = self.expression()
+        self.eat("RPAREN")
+        self.eat("LBRACE")
+        true_branch = self.sentence_list()
+        self.eat("RBRACE")
+
+        if self.current_token and self.current_token.type == "ELSE":
+            self.eat("ELSE")
+            self.eat("LBRACE")
+            false_branch = self.sentence_list()
+            self.eat("RBRACE")
+            return Node(
+                name="If",
+                value="if",
+                children=[
+                    condition,
+                    Node(name="TrueBranch", value="true_branch", children=true_branch),
+                    Node(
+                        name="FalseBranch", value="false_branch", children=false_branch
+                    ),
+                ],
+            )
+        else:
+            return Node(
+                name="If",
+                value="if",
+                children=[
+                    condition,
+                    Node(name="TrueBranch", value="true_branch", children=true_branch),
+                ],
+            )
+
+    def while_loop_sentence(self):
+        self.eat("WHILE")
+        self.eat("LPAREN")
+        condition = self.expression()
+        self.eat("RPAREN")
+        self.eat("LBRACE")
+        statements = self.sentence_list()
+        self.eat("RBRACE")
+        return Node(name="While", value="while", children=[condition] + statements)
+
+    def do_while_loop_sentence(self):
+        self.eat("DO")
+        self.eat("LBRACE")
+        statements = self.sentence_list()
+        self.eat("RBRACE")
+        self.eat("WHILE")
+        self.eat("LPAREN")
+        condition = self.expression()
+        self.eat("RPAREN")
+        return Node(name="DoWhile", value="do_while", children=statements + [condition])
+
+    def cin_sentence(self):
+        identifier = self.current_token.value
+        self.eat("CIN")
+        self.eat("IDENTIFIER")
+        self.eat("SEMICOLON")
+        return Node(name="Input", value=identifier)
+
+    def cout_sentence(self):
+        identifier = self.current_token.value
+        self.eat("COUT")
+        expression = self.expression()
+        self.eat("SEMICOLON")
+        return Node(name="Output", value=identifier, children=[expression])
+
     def expression(self):
-        node = self.term()
-        while (
-            self.current_token
-            and self.current_token.type == "ARITHMETIC_OPERATOR"
-            and self.current_token.value in ("+", "-")
-        ):
+        node = self.logical_expression()
+        if self.current_token and self.current_token.type in [
+            "LT",
+            "LE",
+            "GT",
+            "GE",
+            "EQ",
+            "NE",
+        ]:
             token = self.current_token
-            self.eat("ARITHMETIC_OPERATOR")
-            node = Node(token.value, children=[node, self.term()])
+            self.eat(token.type)
+            node = Node(
+                name=token.type,
+                value=token.value,
+                children=[node, self.logical_expression()],
+            )
+        return node
+
+    def logical_expression(self):
+        node = self.simple_expression()
+        while self.current_token and self.current_token.type in ["AND", "OR"]:
+            token = self.current_token
+            self.eat(token.type)
+            node = Node(
+                name=token.type,
+                value=token.value,
+                children=[node, self.simple_expression()],
+            )
+        return node
+
+    def simple_expression(self):
+        node = self.term()
+        while self.current_token and self.current_token.type in ["PLUS", "MINUS"]:
+            token = self.current_token
+            self.eat(token.type)
+            node = Node(
+                name=token.type, value=token.value, children=[node, self.term()]
+            )
         return node
 
     def term(self):
         node = self.factor()
-        while (
-            self.current_token
-            and self.current_token.type == "ARITHMETIC_OPERATOR"
-            and self.current_token.value in ("*", "/", "%")
-        ):
+        while self.current_token and self.current_token.type in [
+            "TIMES",
+            "DIVIDE",
+            "MOD",
+        ]:
             token = self.current_token
-            self.eat("ARITHMETIC_OPERATOR")
-            node = Node(token.value, children=[node, self.factor()])
+            self.eat(token.type)
+            node = Node(
+                name=token.type, value=token.value, children=[node, self.factor()]
+            )
         return node
 
     def factor(self):
-        node = self.base()
-        while (
-            self.current_token
-            and self.current_token.type == "ARITHMETIC_OPERATOR"
-            and self.current_token.value == "^"
-        ):
+        node = self.component()
+        while self.current_token and self.current_token.type == "POW":
             token = self.current_token
-            self.eat("ARITHMETIC_OPERATOR")
-            node = Node(token.value, children=[node, self.base()])
+            self.eat("POW")
+            node = Node(
+                name=token.type, value=token.value, children=[node, self.component()]
+            )
         return node
 
-    def base(self):
-        token = self.current_token
-        if token.type in (
-            "INTEGER_NUMBER",
-            "REAL_NUMBER",
-            "NEGATIVE_INTEGER_NUMBER",
-            "NEGATIVE_REAL_NUMBER",
-        ):
-            self.eat(token.type)
-            return Node(token.value)
-        elif token.type == "LPAREN":
+    def component(self):
+        if self.current_token.type == "LPAREN":
             self.eat("LPAREN")
             node = self.expression()
             self.eat("RPAREN")
             return node
-        elif token.type == "IDENTIFIER":
+        elif self.current_token.type in [
+            "INTEGER_NUMBER",
+            "REAL_NUMBER",
+            "NEGATIVE_INTEGER_NUMBER",
+            "NEGATIVE_REAL_NUMBER",
+        ]:
+            value = self.current_token.value
+            self.eat(self.current_token.type)
+            return Node(name="Number", value=value)
+        elif self.current_token.type == "IDENTIFIER":
+            identifier = self.current_token.value
             self.eat("IDENTIFIER")
-            return Node(token.value)
+            return Node(name="Identifier", value=identifier)
         else:
-            raise Exception(f"Unexpected token {token.type}")
+            raise Exception(f"Unexpected token {self.current_token.type}")
 
-    def render_tree(self, node):
-        return "\n".join([f"{pre}{node.name}" for pre, fill, node in RenderTree(node)])
+    def render_tree(self, ast):
+        tree_str = ""
+        for pre, _, node in RenderTree(ast):
+            tree_str += "%s%s\n" % (pre, node)
+        return tree_str
 
 
 # Example usage
 if __name__ == "__main__":
+    import sys
+    from pathlib import Path
     from anytree.exporter import DotExporter
     from lexer import get_lexical_analysis
 
@@ -99,8 +342,6 @@ if __name__ == "__main__":
         if not file_path.exists():
             print("File does not exist")
         else:
-            # bytes = file_path.read_bytes()
-            # print(bytes)
             tkns, errs = get_lexical_analysis(file_path)
 
             parser = Parser(tkns)
