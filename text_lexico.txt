@@ -1,7 +1,7 @@
 main {
     int x, y;
     double z;
-
+    x=33-3;
     x = 5;
     y = 10;
     z = x + y * 2.5;
