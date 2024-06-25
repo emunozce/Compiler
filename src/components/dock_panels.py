@@ -3,10 +3,17 @@ File that contains the dock panels of the application
 """
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QTextBrowser, QDockWidget
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QTextBrowser,
+    QDockWidget,
+    QTreeWidget,
+    QTreeWidgetItem,
+)
 
 
 lexer = []  # List to store the widgets of the lexer dock panel
+syntactic = []  # List to store the widgets of the syntactic dock panel
 
 
 def set_up_dock_panels(window: QMainWindow):
@@ -24,16 +31,18 @@ def set_up_dock_panels(window: QMainWindow):
     lexer_panel = QDockWidget("Lexico", window)
     lexer_panel.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
     lexer_widget = QTextBrowser()
-    lexer.append(lexer_widget)
     lexer_widget.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
+    lexer.append(lexer_widget)
     lexer_panel.setWidget(lexer_widget)
     window.addDockWidget(Qt.BottomDockWidgetArea, lexer_panel)
 
     # Panel for the Sintactic Analysis
     sintactic_panel = QDockWidget("Sintactico", window)
     sintactic_panel.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
-    sintactic_widget = QTextBrowser()
+    sintactic_widget = QTreeWidget()
     sintactic_widget.setStyleSheet(open("./src/css/style.css", encoding="utf-8").read())
+    sintactic_widget.setHeaderHidden(True)
+    syntactic.append(sintactic_widget)
     sintactic_panel.setWidget(sintactic_widget)
     window.addDockWidget(Qt.BottomDockWidgetArea, sintactic_panel)
 
@@ -131,3 +140,20 @@ def set_lexical_analysis_result(results: list[str]):
         errors += f"{element}\n"
     lexer[0].setText(tokens)
     lexer[1].setText(errors)
+
+
+def set_syntactic_analysis_result(ast):
+    """Set the results of the sintactic analysis in the dock panel"""
+    syntactic[0].clear()
+    root_item = QTreeWidgetItem(syntactic[0], [ast.value])
+    for child in ast.children:
+        add_tree_item(root_item, child)
+        syntactic[0].expandAll()
+
+
+def add_tree_item(parent, node):
+    """Add a tree item to the tree widget"""
+    item = QTreeWidgetItem(parent, [node.value])
+    for child in node.children:
+        add_tree_item(item, child)
+    return item

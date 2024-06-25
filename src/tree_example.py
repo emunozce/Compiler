@@ -21,7 +21,6 @@ class Parser:
         self.tokens = tokens
         self.current_token_index = 0
         self.current_token = self.tokens[self.current_token_index]
-        self.errors = []  # Añadir una lista para almacenar errores
 
     def eat(self, token_type):
         if self.current_token.type == token_type:
@@ -29,29 +28,12 @@ class Parser:
             if self.current_token_index < len(self.tokens):
                 self.current_token = self.tokens[self.current_token_index]
         else:
-            error_message = f"Unexpected token {self.current_token.type}, expected {token_type} at line {self.current_token.lineno}, position {self.current_token.lexpos}"
-            self.errors.append(error_message)
-            self.synchronize()
-
-    def synchronize(self):
-        # Saltar tokens hasta encontrar uno que pueda comenzar una nueva declaración
-        while self.current_token_index < len(self.tokens) and self.current_token.type not in ["SEMICOLON", "RBRACE", "LBRACE"]:
-            self.current_token_index += 1
-            if self.current_token_index < len(self.tokens):
-                self.current_token = self.tokens[self.current_token_index]
-
-        # Saltar el token de sincronización
-        if self.current_token_index < len(self.tokens):
-            self.current_token_index += 1
-            if self.current_token_index < len(self.tokens):
-                self.current_token = self.tokens[self.current_token_index]
+            raise Exception(
+                f"Unexpected token {self.current_token.type}, expected {token_type}"
+            )
 
     def parse(self):
-        program_node = self.program()
-        if self.errors:
-            error_node = Node(name="Errors", children=[Node(name="Error", value=error) for error in self.errors])
-            program_node.children = program_node.children + (error_node,)
-        return program_node
+        return self.program()
 
     def program(self):
         token = self.current_token
@@ -105,11 +87,7 @@ class Parser:
     def sentence_list(self):
         statements = []
         while self.current_token and self.current_token.type != "RBRACE":
-            try:
-                statements.append(self.sentence())
-            except Exception as e:
-                self.errors.append(str(e))
-                self.synchronize()
+            statements.append(self.sentence())
         return statements
 
     def sentence(self):

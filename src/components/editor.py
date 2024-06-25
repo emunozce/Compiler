@@ -97,6 +97,7 @@ class CustomLexer(QsciLexerCustom):
         self.COMMENT = 4
         self.ARITHMETIC_OPERATOR = 5
         self.RELATIONAL_OPERATOR = 6
+        self.LOGICAL_OPERATOR = 7
 
         # Styles
         self.setColor(QColor(self.color1), self.DEFAULT)
@@ -106,6 +107,7 @@ class CustomLexer(QsciLexerCustom):
         self.setColor(QColor("#6ff781"), self.COMMENT)
         self.setColor(QColor("#de0000"), self.ARITHMETIC_OPERATOR)
         self.setColor(QColor("#1685f5"), self.RELATIONAL_OPERATOR)
+        self.setColor(QColor("#1685f5"), self.LOGICAL_OPERATOR)
 
         # Paper Color
         self.setPaper(QColor(self.color2), self.DEFAULT)
@@ -115,6 +117,7 @@ class CustomLexer(QsciLexerCustom):
         self.setPaper(QColor(self.color2), self.COMMENT)
         self.setPaper(QColor(self.color2), self.ARITHMETIC_OPERATOR)
         self.setPaper(QColor(self.color2), self.RELATIONAL_OPERATOR)
+        self.setPaper(QColor(self.color2), self.LOGICAL_OPERATOR)
 
         # Font
         self.setFont(QFont("Monospace", 12), self.DEFAULT)
@@ -124,6 +127,7 @@ class CustomLexer(QsciLexerCustom):
         self.setFont(QFont("Monospace", 12), self.COMMENT)
         self.setFont(QFont("Monospace", 12), self.ARITHMETIC_OPERATOR)
         self.setFont(QFont("Monospace", 12), self.RELATIONAL_OPERATOR)
+        self.setFont(QFont("Monospace", 12), self.LOGICAL_OPERATOR)
 
     def language(self):
         return "CustomLexer"
@@ -143,6 +147,8 @@ class CustomLexer(QsciLexerCustom):
             return "Arithmetic Operator"
         elif style == self.RELATIONAL_OPERATOR:
             return "Relational Operator"
+        elif style == self.LOGICAL_OPERATOR:
+            return "Logical Operator"
         else:
             return ""
 
@@ -150,11 +156,12 @@ class CustomLexer(QsciLexerCustom):
         ############################## Patterns ##############################
         identifier_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
         reserved_words_pattern = re.compile(
-            r"\b(if|else|do|while|switch|case|double|main|cin|cout|int|real|then|end|until)\b"
+            r"\b(if|else|do|while|switch|case|double|main|cin|cout|int|float)\b"
         )
         number_pattern = re.compile(r"\b\d+\b")
         aritmethic_op_pattern = re.compile(r"\+|-|\*|/|%|\^")
         relational_op_pattern = re.compile(r"<|>|!|=")
+        logical_op_pattern = re.compile(r"\b(?:and|or)\b")
         p = re.compile(r"//.*?$|/\*|\*/|\b\w+\b|\W", re.MULTILINE)
         ######################################################################
 
@@ -184,6 +191,8 @@ class CustomLexer(QsciLexerCustom):
                 self.setStyling(token[1], self.COMMENT)
             elif reserved_words_pattern.match(token[0]):
                 self.setStyling(token[1], self.KEYWORD)
+            elif logical_op_pattern.match(token[0]):
+                self.setStyling(token[1], self.LOGICAL_OPERATOR)
             elif identifier_pattern.match(token[0]):
                 self.setStyling(token[1], self.IDENTIFIER)
             elif number_pattern.match(token[0]) or token[0] == ".":

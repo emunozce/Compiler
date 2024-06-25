@@ -1,31 +1,30 @@
 QMainWindow {
     background-color: #282c34;
-    color: #D3D3D3
+    color: #d3d3d3;
 }
 
-QMainWindow::statusBar {
-    background-color: #D3D3D3;
+QMainWindow::statusbar {
+    background-color: #d3d3d3;
 }
 
 QMenuBar {
     background-color: #21252b;
-    color: #D3D3D3;
+    color: #d3d3d3;
 }
 
 QMenuBar * {
     background-color: #21252b;
-    color: #D3D3D3;
+    color: #d3d3d3;
 }
-
 
 QTabWidget {
     background-color: #282c34;
-    color: #D3D3D3;
+    color: #d3d3d3;
 }
 
 QTabBar::tab {
     background-color: rgb(36, 36, 36);
-    color: #D3D3D3;
+    color: #d3d3d3;
     height: 35px;
     width: 200px;
     border-style: none;
@@ -33,13 +32,13 @@ QTabBar::tab {
 
 QTabBar::tab:selected {
     background-color: #2d2d2d;
-    color: #D3D3D3;
+    color: #d3d3d3;
     border-style: none;
-    border-bottom: 2px solid #D3D3D3;
+    border-bottom: 2px solid #d3d3d3;
 }
 
 QTabBar::close-button {
-    image: url("src/icons/close-icon.svg");
+    image: url('src/icons/close-icon.svg');
 }
 
 QSplitter {
@@ -138,11 +137,10 @@ QScrollBar::add-line::horizontal {
 QScrollBar::add-page:horizontal,
 QScrollBar::sub-page:horizontal {
     background: none;
-
 }
 
 QDockWidget {
-    color: #D3D3D3;
+    color: #d3d3d3;
     margin: 0;
 }
 
@@ -152,16 +150,29 @@ QDockWidget::title {
 
 QTextBrowser {
     background-color: #000000;
-    color: #D3D3D3;
+    color: #d3d3d3;
 }
 
 QStatusBar {
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     color: #000000;
 }
 
 QsciScintilla {
     border: none;
     background-color: #282c34;
-    color: #D3D3D3;
+    color: #d3d3d3;
+}
+
+QTreeWidget {
+    background-color: black;
+    color: white;
+}
+QTreeWidget::item {
+    background-color: black;
+    color: white;
+}
+QTreeWidget::item:selected {
+    background-color: gray;
+    color: white;
 }
