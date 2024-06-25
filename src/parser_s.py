@@ -30,7 +30,7 @@ class Parser:
                 self.current_token = self.tokens[self.current_token_index]
         else:
             error_message = f"Unexpected token {self.current_token.type}, expected {token_type} at line {self.current_token.lineno}, position {self.current_token.lexpos}"
-            self.errors.append(error_message)
+            self.errors.append((error_message, self.current_token.lineno, self.current_token.lexpos))
             self.synchronize()
 
     def synchronize(self):
@@ -49,7 +49,16 @@ class Parser:
     def parse(self):
         program_node = self.program()
         if self.errors:
-            error_node = Node(name="Errors", children=[Node(name="Error", value=error) for error in self.errors])
+            error_node = Node(
+                name="Errors", 
+                children=[
+                    Node(
+                        name="Error", 
+                        value=f"{error_message} at line {line}, position {pos}"
+                    ) 
+                    for error_message, line, pos in self.errors
+                ]
+            )
             program_node.children = program_node.children + (error_node,)
         return program_node
 
@@ -108,7 +117,7 @@ class Parser:
             try:
                 statements.append(self.sentence())
             except Exception as e:
-                self.errors.append(str(e))
+                self.errors.append((str(e), self.current_token.lineno, self.current_token.lexpos))
                 self.synchronize()
         return statements
 
