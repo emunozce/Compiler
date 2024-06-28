@@ -1,4 +1,5 @@
 main {
+    x = 33 - 3;
     int x, y, z;
     float a, b, c;
     a = 34.53;
