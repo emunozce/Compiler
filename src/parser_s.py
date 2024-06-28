@@ -20,59 +20,45 @@ class Parser:
     def __init__(self, tokens: list[Token]):
         self.tokens = tokens
         self.current_token_index = 0
-        self.current_token = self.tokens[self.current_token_index]
-<<<<<<< HEAD
-=======
-        self.errors = []  # Añadir una lista para almacenar errores
->>>>>>> Hernan
+        self.current_token = (
+            self.tokens[self.current_token_index] if self.tokens else None
+        )
+        self.errors = []
 
     def eat(self, token_type):
-        if self.current_token.type == token_type:
+        if self.current_token and self.current_token.type == token_type:
             self.current_token_index += 1
             if self.current_token_index < len(self.tokens):
                 self.current_token = self.tokens[self.current_token_index]
+            else:
+                self.current_token = None
         else:
-<<<<<<< HEAD
-            raise Exception(
-                f"Unexpected token {self.current_token.type}, expected {token_type}"
-            )
-
-    def parse(self):
-        return self.program()
-=======
-            error_message = f"Unexpected token {self.current_token.type}, expected {token_type} at line {self.current_token.lineno}, position {self.current_token.lexpos}"
-            self.errors.append((error_message, self.current_token.lineno, self.current_token.lexpos))
+            error_message = f"Unexpected token {self.current_token.type if self.current_token else 'None'}, expected {token_type} at line {self.current_token.lineno if self.current_token else 'None'}, position {self.current_token.lexpos if self.current_token else 'None'}"
+            self.errors.append(error_message)
             self.synchronize()
 
     def synchronize(self):
-        # Saltar tokens hasta encontrar uno que pueda comenzar una nueva declaración
-        while self.current_token_index < len(self.tokens) and self.current_token.type not in ["SEMICOLON", "RBRACE", "LBRACE"]:
+        while (
+            self.current_token_index < len(self.tokens)
+            and self.current_token
+            and self.current_token.type not in ["SEMICOLON", "RBRACE", "LBRACE"]
+        ):
             self.current_token_index += 1
             if self.current_token_index < len(self.tokens):
                 self.current_token = self.tokens[self.current_token_index]
+            else:
+                self.current_token = None
 
-        # Saltar el token de sincronización
         if self.current_token_index < len(self.tokens):
             self.current_token_index += 1
             if self.current_token_index < len(self.tokens):
                 self.current_token = self.tokens[self.current_token_index]
+            else:
+                self.current_token = None
 
     def parse(self):
-        program_node = self.program()
-        if self.errors:
-            error_node = Node(
-                name="Errors", 
-                children=[
-                    Node(
-                        name="Error", 
-                        value=f"{error_message} at line {line}, position {pos}"
-                    ) 
-                    for error_message, line, pos in self.errors
-                ]
-            )
-            program_node.children = program_node.children + (error_node,)
-        return program_node
->>>>>>> Hernan
+        root_node = self.program()
+        return root_node
 
     def program(self):
         token = self.current_token
@@ -82,9 +68,7 @@ class Parser:
         statements = self.sentence_list()
         self.eat("RBRACE")
         return Node(
-            name="Program",
-            value=token.value,
-            children=declarations + statements,
+            name="Program", value=token.value, children=declarations + statements
         )
 
     def declaration_list(self):
@@ -107,11 +91,52 @@ class Parser:
         else:
             return self.sentence()
 
-    def variable_declaration(self, type):
-        self.eat(type.upper())
-        ids = self.identifier()
+    def variable_declaration(self, var_type):
+        self.eat(var_type.upper())
+        declarations = self.identifier_with_optional_initialization()
         self.eat("SEMICOLON")
-        return Node(name="VariableDeclaration", value=type, children=ids)
+        return Node(name="VariableDeclaration", value=var_type, children=declarations)
+
+    def identifier_with_optional_initialization(self):
+        declarations = []
+        identifier_token = self.current_token.value
+        self.eat("IDENTIFIER")
+
+        if self.current_token and self.current_token.type == "ASSIGN":
+            self.eat("ASSIGN")
+            initialization_expression = self.expression()
+            declarations.append(
+                Node(
+                    name="Variable",
+                    value=identifier_token,
+                    children=[
+                        Node(name="Initialization", value=initialization_expression)
+                    ],
+                )
+            )
+        else:
+            declarations.append(Node(name="Variable", value=identifier_token))
+
+        while self.current_token and self.current_token.type == "COMMA":
+            self.eat("COMMA")
+            identifier_token = self.current_token.value
+            self.eat("IDENTIFIER")
+            if self.current_token and self.current_token.type == "ASSIGN":
+                self.eat("ASSIGN")
+                initialization_expression = self.expression()
+                declarations.append(
+                    Node(
+                        name="Variable",
+                        value=identifier_token,
+                        children=[
+                            Node(name="Initialization", value=initialization_expression)
+                        ],
+                    )
+                )
+            else:
+                declarations.append(Node(name="Variable", value=identifier_token))
+
+        return declarations
 
     def identifier(self):
         ids = []
@@ -126,15 +151,7 @@ class Parser:
     def sentence_list(self):
         statements = []
         while self.current_token and self.current_token.type != "RBRACE":
-<<<<<<< HEAD
             statements.append(self.sentence())
-=======
-            try:
-                statements.append(self.sentence())
-            except Exception as e:
-                self.errors.append((str(e), self.current_token.lineno, self.current_token.lexpos))
-                self.synchronize()
->>>>>>> Hernan
         return statements
 
     def sentence(self):
@@ -151,7 +168,10 @@ class Parser:
         elif self.current_token.type == "IDENTIFIER":
             return self.assignment_or_increment_decrement()
         else:
-            raise Exception(f"Unexpected token {self.current_token.type}")
+            error_message = f"Unexpected token {self.current_token.type if self.current_token else 'None'} Sat line {self.current_token.lineno if self.current_token else 'None'}, position {self.current_token.lexpos if self.current_token else 'None'}"
+            self.errors.append(error_message)
+            self.synchronize()
+            return
 
     def assignment_or_increment_decrement(self):
         identifier_token = self.current_token.value
@@ -186,7 +206,10 @@ class Parser:
                 children=[Node("Identifier", value=identifier_token)],
             )
         else:
-            raise Exception(f"Unexpected token {self.current_token.type}")
+            error_message = f"Unexpected token {self.current_token.type if self.current_token else 'None'}, expected at line {self.current_token.lineno if self.current_token else 'None'}, position {self.current_token.lexpos if self.current_token else 'None'}"
+            self.errors.append(error_message)
+            self.synchronize()
+            return
 
     def assignment(self):
         identifier_token = self.current_token.value
@@ -262,6 +285,7 @@ class Parser:
         self.eat("LPAREN")
         condition = self.expression()
         self.eat("RPAREN")
+        self.eat("SEMICOLON")
         return Node(name="DoWhile", value="do_while", children=statements + [condition])
 
     def cin_sentence(self):
@@ -363,7 +387,10 @@ class Parser:
             self.eat("IDENTIFIER")
             return Node(name="Identifier", value=identifier)
         else:
-            raise Exception(f"Unexpected token {self.current_token.type}")
+            error_message = f"Unexpected token {self.current_token.type if self.current_token else 'None'}, at line {self.current_token.lineno if self.current_token else 'None'}, position {self.current_token.lexpos if self.current_token else 'None'}"
+            self.errors.append(error_message)
+            self.synchronize()
+            return
 
     def render_tree(self, ast):
         tree_str = ""
@@ -376,7 +403,6 @@ class Parser:
 if __name__ == "__main__":
     import sys
     from pathlib import Path
-    from anytree.exporter import DotExporter
     from lexer import get_lexical_analysis
 
     args = sys.argv
@@ -399,5 +425,4 @@ if __name__ == "__main__":
 
             print(tree_str)
 
-            # Optionally, export the tree to a file (e.g., a dot file for visualization)
-            DotExporter(ast).to_dotfile("ast.dot")
+            print(parser.errors)

@@ -16,7 +16,7 @@ class Token:
         self.lexpos = lexpos
 
     def __repr__(self):
-        return f"Token({self.type}, {self.value}, {self.lineno}, {self.lexpos})"
+        return f"({self.type}, {self.value}, {self.lineno}, {self.lexpos})"
 
 
 def get_lexical_analysis(file: Path):
@@ -109,7 +109,9 @@ def get_lexical_analysis(file: Path):
                         rest_of_string = line[index_string + 1 :]
                         while True:
                             for c in rest_of_string:
-                                if re.match(identifier_pattern, c):
+                                if re.match(identifier_pattern, c) or re.match(
+                                    number_pattern, c
+                                ):
                                     identifier += c
                                     skip_col += 1
                                 else:
@@ -207,7 +209,7 @@ def get_lexical_analysis(file: Path):
                     if not is_block_comment:
                         errors.append(
                             Token(
-                                "Error",
+                                "ERROR",
                                 f"Invalid character => {char}",
                                 lineno,
                                 lexpos,
@@ -228,7 +230,7 @@ def get_lexical_analysis(file: Path):
         if is_block_comment:
             errors.append(
                 Token(
-                    "Error",
+                    "ERROR",
                     "Block comment not closed",
                     is_block_starting[0],
                     is_block_starting[1],
