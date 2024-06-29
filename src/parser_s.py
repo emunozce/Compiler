@@ -128,7 +128,7 @@ class Parser:
                     )
                 )
             else:
-                declarations.append(Node(name=identifier_token))
+                declarations.append(Node(name="DECLARATION", value=identifier_token))
 
         return declarations
 
