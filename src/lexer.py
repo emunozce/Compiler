@@ -109,9 +109,7 @@ def get_lexical_analysis(file: Path):
                         rest_of_string = line[index_string + 1 :]
                         while True:
                             for c in rest_of_string:
-                                if re.match(identifier_pattern, c) or re.match(
-                                    number_pattern, c
-                                ):
+                                if re.match(identifier_pattern, identifier + c):
                                     identifier += c
                                     skip_col += 1
                                 else:
