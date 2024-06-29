@@ -30,9 +30,7 @@ class Parser:
             self.current_token_index += 1
             if self.current_token_index < len(self.tokens):
                 self.current_token = self.tokens[self.current_token_index]
-            else:
-                self.current_token = None
-        else:
+        elif self.current_token and self.current_token.type != None:
             error_message = f"Unexpected token {self.current_token.type if self.current_token else 'None'}, expected {token_type} at line {self.current_token.lineno if self.current_token else 'None'}, position {self.current_token.lexpos if self.current_token else 'None'}"
             self.errors.append(error_message)
             self.synchronize()
@@ -106,16 +104,10 @@ class Parser:
             self.eat("ASSIGN")
             initialization_expression = self.expression()
             declarations.append(
-                Node(
-                    name="Variable",
-                    value=identifier_token,
-                    children=[
-                        Node(name="Initialization", value=initialization_expression)
-                    ],
-                )
+                Node(name=identifier_token, children=[initialization_expression])
             )
         else:
-            declarations.append(Node(name="Variable", value=identifier_token))
+            declarations.append(Node(name=identifier_token))
 
         while self.current_token and self.current_token.type == "COMMA":
             self.eat("COMMA")
@@ -125,16 +117,10 @@ class Parser:
                 self.eat("ASSIGN")
                 initialization_expression = self.expression()
                 declarations.append(
-                    Node(
-                        name="Variable",
-                        value=identifier_token,
-                        children=[
-                            Node(name="Initialization", value=initialization_expression)
-                        ],
-                    )
+                    Node(name=identifier_token, children=[initialization_expression])
                 )
             else:
-                declarations.append(Node(name="Variable", value=identifier_token))
+                declarations.append(Node(name=identifier_token))
 
         return declarations
 
