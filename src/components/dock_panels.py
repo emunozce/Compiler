@@ -99,6 +99,7 @@ def set_up_dock_panels(window: QMainWindow):
         open("./src/css/style.css", encoding="utf-8").read()
     )
     sintactic_err_widget = QTextBrowser()
+    syntactic.append(sintactic_err_widget)
     sintactic_err_widget.setStyleSheet(
         open("./src/css/style.css", encoding="utf-8").read()
     )
@@ -142,13 +143,17 @@ def set_lexical_analysis_result(results: list[str]):
     lexer[1].setText(errors)
 
 
-def set_syntactic_analysis_result(ast):
+def set_syntactic_analysis_result(ast, errors: list[str]):
     """Set the results of the sintactic analysis in the dock panel"""
     syntactic[0].clear()
+    syntactic[1].clear()
     root_item = QTreeWidgetItem(syntactic[0], [ast.value])
     for child in ast.children:
         add_tree_item(root_item, child)
         syntactic[0].expandAll()
+    for error in errors:
+        errors_string = f"{error}\n"
+        syntactic[1].setText(errors_string)
 
 
 def add_tree_item(parent, node):

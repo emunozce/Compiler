@@ -104,10 +104,14 @@ class Parser:
             self.eat("ASSIGN")
             initialization_expression = self.expression()
             declarations.append(
-                Node(name=identifier_token, children=[initialization_expression])
+                Node(
+                    name="INITIALIZATION",
+                    value=identifier_token,
+                    children=[initialization_expression],
+                )
             )
         else:
-            declarations.append(Node(name=identifier_token))
+            declarations.append(Node(name="DECLARATION", value=identifier_token))
 
         while self.current_token and self.current_token.type == "COMMA":
             self.eat("COMMA")
@@ -117,7 +121,11 @@ class Parser:
                 self.eat("ASSIGN")
                 initialization_expression = self.expression()
                 declarations.append(
-                    Node(name=identifier_token, children=[initialization_expression])
+                    Node(
+                        name="DECLARATION",
+                        value=identifier_token,
+                        children=[initialization_expression],
+                    )
                 )
             else:
                 declarations.append(Node(name=identifier_token))
